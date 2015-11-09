@@ -2,6 +2,7 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
+#include "imageload.h"
 #include "init.h"
 
 namespace Ui {
@@ -18,6 +19,8 @@ public:
 
 private:
     Ui::MainWindow *ui;
+    ImageLoad *imload;
+
 };
 
 #endif // MAINWINDOW_H

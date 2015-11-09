@@ -11,12 +11,13 @@
 class ImageLoad
 {
 private:
-    cv::Mat image;
-    cv::Mat fgSeeds;
-    cv::Mat bgSeeds;
+    cv::Mat image;                          //the image to be segmented
+    cv::Mat fgSeeds;                        //foreground seeds
+    cv::Mat bgSeeds;                        //background seeds
 public:
-    ImageLoad();
-
+    ImageLoad(std::string, int);
+    cv::Mat getImage();
+    ~ImageLoad();
 };
 
 #endif // IMAGELOAD_H

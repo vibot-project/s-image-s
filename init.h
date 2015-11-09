@@ -15,8 +15,9 @@
 #define INIT
 
 #include <opencv2/opencv.hpp>
-#include <eigen3/Eigen/Eigen>
+#include <eigen3/Eigen/Sparse>
 #include <iostream>
+#include <cstring>
 #include <QDebug>
 
 #endif // INIT
