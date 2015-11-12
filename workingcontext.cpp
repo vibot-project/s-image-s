@@ -1,6 +1,12 @@
 #include "workingcontext.h"
 
-WorkingContext::WorkingContext(const cv::Mat &image, const cv::Mat &fgSeeds, const cv::Mat &bgSeeds)
+
+//using WorkingContext::dx;
+//using WorkingContext::dy;
+const int WorkingContext::dx[] = {1, 0, -1, 0};
+const int WorkingContext::dy[] = {0, 1, 0, -1};
+
+WorkingContext::WorkingContext(const cv::Mat &image, const cv::Mat &fgSeeds, const cv::Mat &bgSeeds)//:dx({1, 0, -1, 0}),dy({0, 1, 0, -1})
 {
     if(!image.empty() && !fgSeeds.empty() && !bgSeeds.empty())
     {
@@ -48,13 +54,13 @@ void WorkingContext::initSparse(const cv::Mat &image)
             for(int k = 0; k < 4; k++){
                 if((i+dy[k] < 0 || i+dy[k] >= N)||(j+dx[k] < 0 || j+dx[k] >= M)) continue;
                 double w;
-                w = norm(image.at<Vec3f>(i, j), image.at<Vec3f>(i+dy[k], j+dx[k]), NORM_INF);
+                w = cv::norm(image.at<cv::Vec3f>(i, j), image.at<cv::Vec3f>(i+dy[k], j+dx[k]), cv::NORM_INF);
                 w = exp(-(beta*w*w)/(sigma)) + eps;
-                WijTriplet.push_back(Triplet<double>(i*M+j, (i+dy[k])*M+j+dx[k], w));
+                WijTriplet.push_back(Eigen::Triplet<double>(i*M+j, (i+dy[k])*M+j+dx[k], w));
                 sw += w;
             }
-            DTriplet.push_back(Triplet<double>(i*M+j, i*M+j, sw));
-            seeds.count(i*M+j) != 0 ? IsTriplet.push_back(Triplet<double>(i*M+j, i*M+j, 1.)) : IsTriplet.push_back(Triplet<double>(i*M+j, i*M+j, 0.));
+            DTriplet.push_back(Eigen::Triplet<double>(i*M+j, i*M+j, sw));
+            seeds.count(i*M+j) != 0 ? IsTriplet.push_back(Eigen::Triplet<double>(i*M+j, i*M+j, 1.)) : IsTriplet.push_back(Eigen::Triplet<double>(i*M+j, i*M+j, 0.));
             if(fseeds.count(i*M+j) != 0)
                 b(i*M+j) = Xf;
             else if(bseeds.count(i*M+j) != 0)

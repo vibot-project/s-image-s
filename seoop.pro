@@ -13,7 +13,7 @@ TEMPLATE = app
 
 LIBS += `pkg-config opencv --libs`
 
-
+CONFIG += c++11
 
 SOURCES += main.cpp\
         mainwindow.cpp \

@@ -18,6 +18,8 @@
 #include <eigen3/Eigen/Sparse>
 #include <iostream>
 #include <cstring>
+#include <vector>
+#include <set>
 #include <QDebug>
 
 #endif // INIT
