@@ -11,7 +11,20 @@ greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 TARGET = seoop
 TEMPLATE = app
 
-LIBS += `pkg-config opencv --libs`
+
+unix {
+    LIBS += `pkg-config opencv --libs`
+}
+
+mac {
+    #LIBS += opencv libs
+    #LIBS += eigen libs
+}
+
+win32 {
+    #LIBS += opencv libs
+    #LIBS += eigen libs
+}
 
 CONFIG += c++11
 
