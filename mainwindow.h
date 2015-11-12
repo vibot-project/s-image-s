@@ -2,8 +2,10 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
-#include "imageload.h"
 #include "init.h"
+#include "imageload.h"
+#include "workingcontext.h"
+#include "algorithm.h"
 
 namespace Ui {
 class MainWindow;
@@ -20,7 +22,8 @@ public:
 private:
     Ui::MainWindow *ui;
     ImageLoad *imload;
-
+    WorkingContext *context;
+    Algorithm *algo;
 };
 
 #endif // MAINWINDOW_H

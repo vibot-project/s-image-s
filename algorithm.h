@@ -6,9 +6,12 @@
 
 class Algorithm
 {
+private:
+    Eigen::SimplicialLDLT<Eigen::SparseMatrix<double> > solverA;
+    Eigen::VectorXd x;
 public:
     Algorithm();
-    static void solver(const WorkingContext &context);
+    Eigen::VectorXd solver(const Eigen::SparseMatrix <double> &A, const Eigen::VectorXd &b);
 };
 
 #endif // ALGORITHM_H

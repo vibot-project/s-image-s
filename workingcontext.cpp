@@ -5,8 +5,15 @@
 //using WorkingContext::dy;
 const int WorkingContext::dx[] = {1, 0, -1, 0};
 const int WorkingContext::dy[] = {0, 1, 0, -1};
+const double WorkingContext::eps = 0.000001;
 
-WorkingContext::WorkingContext(const cv::Mat &image, const cv::Mat &fgSeeds, const cv::Mat &bgSeeds)//:dx({1, 0, -1, 0}),dy({0, 1, 0, -1})
+WorkingContext::WorkingContext(const cv::Mat &image,
+                               const cv::Mat &fgSeeds,
+                               const cv::Mat &bgSeeds,
+                               const double &_sigma,
+                               const double &_beta,
+                               const double &_Xb,
+                               const double &_Xf):sigma(_sigma),beta(_beta),Xb(_Xb),Xf(_Xf)
 {
     if(!image.empty() && !fgSeeds.empty() && !bgSeeds.empty())
     {
@@ -16,6 +23,26 @@ WorkingContext::WorkingContext(const cv::Mat &image, const cv::Mat &fgSeeds, con
         initSeeds(fgSeeds, bgSeeds);
         initSparse(image);
     }
+}
+
+Eigen::SparseMatrix<double> WorkingContext::getA()
+{
+    return this->A;
+}
+
+int WorkingContext::getRows()
+{
+    return this->N;
+}
+
+int WorkingContext::getCols()
+{
+    return this->M;
+}
+
+Eigen::VectorXd WorkingContext::getB()
+{
+    return this->b;
 }
 
 void WorkingContext::declareSparse(int N, int M)
@@ -73,5 +100,8 @@ void WorkingContext::initSparse(const cv::Mat &image)
     Wij.setFromTriplets(WijTriplet.begin(), WijTriplet.end());
     D.setFromTriplets(DTriplet.begin(), DTriplet.end());
     Is.setFromTriplets(IsTriplet.begin(), IsTriplet.end());
+    L = D - Wij;
+    L = L * L;
+    A = Is + L;
 }
 

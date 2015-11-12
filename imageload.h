@@ -15,8 +15,10 @@ private:
     cv::Mat fgSeeds;                        //foreground seeds
     cv::Mat bgSeeds;                        //background seeds
 public:
-    ImageLoad(std::string, int);
+    ImageLoad(std::string, std::string, int);
     cv::Mat getImage();
+    cv::Mat getFgSeeds();
+    cv::Mat getBgSeeds();
     ~ImageLoad();
 };
 
