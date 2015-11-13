@@ -30,5 +30,7 @@ MainWindow::MainWindow(QWidget *parent) :
 MainWindow::~MainWindow()
 {
     delete imload;
+    delete context;
+    delete algo;
     delete ui;
 }
