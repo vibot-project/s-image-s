@@ -15,7 +15,11 @@
 #define INIT
 
 #include <opencv2/opencv.hpp>
-#include <eigen3/Eigen/Sparse>
+#ifdef EIGEN_SPARSE_MODULE_H
+    #include <Eigen/Sparse>
+#else
+    #include <eigen3/Eigen/Sparse>
+#endif
 #include <iostream>
 #include <cstring>
 #include <vector>
