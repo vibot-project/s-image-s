@@ -8,7 +8,9 @@ ImageLoad::ImageLoad(std::string filepath, std::string filename, int flags = CV_
     if(this->image.empty() || this->fgSeeds.empty() || this->bgSeeds.empty()){
         qDebug() << "IMAGE_LOAD: Image is not loaded!";
     }
-    image.convertTo(image, CV_32F);                 //Normalize image
+    qDebug() << image.type();
+    image.convertTo(image, CV_32FC3);                 //Normalize image
+    qDebug() << image.type();
 }
 
 cv::Mat ImageLoad::getImage()
