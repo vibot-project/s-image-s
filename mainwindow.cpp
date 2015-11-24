@@ -6,7 +6,7 @@ MainWindow::MainWindow(QWidget *parent) :
     ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
-    imload = new ImageLoad("/home/cnx/QtProjects/se_project_prototype/", "lena.jpg", CV_LOAD_IMAGE_COLOR);
+    imload = new ImageLoad("/Users/Songyou/Desktop/Samples/", "lena.jpg", CV_LOAD_IMAGE_COLOR);
     context = new WorkingContext(imload->getImage(),
                                  imload->getFgSeeds(),
                                  imload->getBgSeeds());

@@ -6,7 +6,7 @@
  * Seeded Image Segmentation. In Computer Vision and Pattern Recognition (CVPR), 2014
  * IEEE Conference on (pp. 384-391). IEEE. Available at http://tinyurl.com/nz77gcm
  *
- * Authors: Kaisar Kushibar, Songyou Peng, Vishnu SorryIDontKnowYourSurname.
+ * Authors: Kaisar Kushibar, Songyou Peng, Vishnu Muthu.
  *
  * You may use, distribute and modify this code as you wish.
 */
@@ -15,7 +15,7 @@
 #define INIT
 
 #include <opencv2/opencv.hpp>
-#include <eigen3/Eigen/Sparse>
+#include <Eigen/Sparse>
 #include <iostream>
 #include <cstring>
 #include <vector>

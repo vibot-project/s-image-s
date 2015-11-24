@@ -19,6 +19,19 @@ unix {
 mac {
     #LIBS += opencv libs
     #LIBS += eigen libs
+INCLUDEPATH += /usr/local/include
+
+LIBS += -L/usr/local/lib \
+   -lopencv_core \
+   -lopencv_highgui \
+   -lopencv_imgproc \
+   -lopencv_features2d \
+   -lopencv_calib3d \
+   -lopencv_nonfree \
+   -lopencv_flann \
+   -lopencv_legacy \
+   -lopencv_stitching
+
 }
 
 win32 {
