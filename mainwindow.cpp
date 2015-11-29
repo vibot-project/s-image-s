@@ -16,7 +16,9 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->scrollArea->setVerticalScrollBarPolicy(Qt::ScrollBarAsNeeded);
     ui->scrollArea->setWidget(imageLabel);
 
-    imload = new ImageLoad("../seoop/images/", "lena.jpg", CV_LOAD_IMAGE_COLOR);
+    //imload = new ImageLoad("../seoop/images/", "lena.jpg", CV_LOAD_IMAGE_COLOR);
+    imload = new ImageLoad("/Users/Songyou/Desktop/Samples/", "lena.jpg", CV_LOAD_IMAGE_COLOR);
+
     context = new WorkingContext(imload->getImage(),
                                  imload->getFgSeeds(),
                                  imload->getBgSeeds());
