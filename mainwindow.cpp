@@ -80,7 +80,7 @@ void MainWindow::showImage(const cv::Mat &pimage)
         qDebug()<<"Error: wrong image format";
     }
     imageLabel->setPixmap(QPixmap::fromImage(qimage));
-    scaleImage(5.0);
+    scaleImage(10.0);
 }
 
 MainWindow::~MainWindow()
