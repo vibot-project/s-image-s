@@ -17,6 +17,7 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->scrollArea->setWidget(imageLabel);
     buttonpro = true;
     select = true;
+    paint = false;
 
     //imload = new ImageLoad("../seoop/images/", "lena.jpg", CV_LOAD_IMAGE_COLOR);
 //    imload = new ImageLoad("/Users/Songyou/Desktop/Samples/", "lena.jpg", CV_LOAD_IMAGE_COLOR);
@@ -157,6 +158,7 @@ void MainWindow::on_process_clicked()
         ui->ground->setEnabled(true);
         ui->process->setText("Reset");
         buttonpro= false;
+        paint = true;
     }
     else
     {
@@ -168,6 +170,7 @@ void MainWindow::on_process_clicked()
         ui->saveButton->setEnabled(false);
         ui->process->setText("Process");
         buttonpro = true;
+        paint = false;
     }
 }
 
@@ -179,6 +182,17 @@ void MainWindow::on_ground_clicked()
         ui->Button_open->setEnabled(false);
         ui->horizontalSlider->setEnabled(false);
         ui->ground->setText("Background");
+
+//        QPainter painter(&tempimg);
+//        QPen paintpen(Qt::red);
+//        paintpen.setWidth(10);
+//        QPoint p1;
+//        p1.setX(mFirstX);
+//        p1.setY(mFirstY);
+//        painter.setPen(paintpen);
+//        painter.drawPoint(p1);
+//        imageLabel->setPixmap(QPixmap::fromImage(tempimg));
+
         select = false;
     }
     else
@@ -190,10 +204,39 @@ void MainWindow::on_ground_clicked()
     }
 }
 
-void MainWindow::mouseMoveEvent( QMouseEvent* event )
-{
+//void MainWindow::mouseMoveEvent( QMouseEvent* event )
+//{
 
-    int x = event->x();
-    int y = event->y();
-    qDebug()<< x << y;
+//    int x = event->x();
+//    int y = event->y();
+//    qDebug()<< x << y;
+//}
+
+void MainWindow::mouseMoveEvent(QMouseEvent *event)
+{
+    xpoint = event->x();
+    ypoint = event->y();
+    qDebug()<<xpoint<<ypoint;
+    if(paint == true)
+    {
+    QImage image(imageLabel->pixmap()->toImage());
+    QPainter painter(&image);
+    if(select == true)
+    {
+    paintpen.setColor(Qt::red);
+    paintpen.setWidth(4);
+    }
+    else
+    {
+    paintpen.setColor(Qt::green);
+    paintpen.setWidth(4);
+    }
+    QPoint p1;
+    p1.setX(xpoint);
+    p1.setY(ypoint);
+    painter.setPen(paintpen);
+    painter.drawPoint(p1);
+    imageLabel->setPixmap(QPixmap::fromImage(image));
+    }
 }
+
