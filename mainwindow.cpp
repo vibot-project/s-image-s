@@ -19,7 +19,7 @@ MainWindow::MainWindow(QWidget *parent) :
     select = true;
 
     //imload = new ImageLoad("../seoop/images/", "lena.jpg", CV_LOAD_IMAGE_COLOR);
-//    imload = new ImageLoad("/Users/Songyou/Desktop/Samples/", "lena.jpg", CV_LOAD_IMAGE_COLOR);
+    //imload = new ImageLoad("/Users/Songyou/Desktop/Samples/", "lena.jpg", CV_LOAD_IMAGE_COLOR);
 
     ui->process->setEnabled(false);
     ui->algstart->setEnabled(false);
