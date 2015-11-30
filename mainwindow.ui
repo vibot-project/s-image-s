@@ -68,16 +68,9 @@
           </property>
           <layout class="QHBoxLayout" name="horizontalLayout_2">
            <item>
-            <widget class="QPushButton" name="pushButton">
+            <widget class="QPushButton" name="Button_open">
              <property name="text">
               <string>Open</string>
-             </property>
-            </widget>
-           </item>
-           <item>
-            <widget class="QPushButton" name="pushButton_2">
-             <property name="text">
-              <string>Save</string>
              </property>
             </widget>
            </item>
@@ -94,16 +87,16 @@
           </property>
           <layout class="QHBoxLayout" name="horizontalLayout_3">
            <item>
-            <widget class="QPushButton" name="pushButton_3">
+            <widget class="QPushButton" name="process">
              <property name="text">
-              <string>Foreground</string>
+              <string>Process</string>
              </property>
             </widget>
            </item>
            <item>
-            <widget class="QPushButton" name="pushButton_4">
+            <widget class="QPushButton" name="ground">
              <property name="text">
-              <string>Background</string>
+              <string>Foreground</string>
              </property>
             </widget>
            </item>
@@ -120,9 +113,16 @@
           </property>
           <layout class="QHBoxLayout" name="horizontalLayout_4">
            <item>
-            <widget class="QPushButton" name="pushButton_5">
+            <widget class="QPushButton" name="algstart">
              <property name="text">
               <string>Start</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QPushButton" name="saveButton">
+             <property name="text">
+              <string>Save</string>
              </property>
             </widget>
            </item>
@@ -148,10 +148,16 @@
            <item>
             <widget class="QSlider" name="horizontalSlider">
              <property name="minimum">
-              <number>-100</number>
+              <number>1</number>
              </property>
              <property name="maximum">
-              <number>100</number>
+              <number>9</number>
+             </property>
+             <property name="pageStep">
+              <number>1</number>
+             </property>
+             <property name="value">
+              <number>5</number>
              </property>
              <property name="orientation">
               <enum>Qt::Horizontal</enum>
@@ -232,7 +238,7 @@
          <x>0</x>
          <y>0</y>
          <width>788</width>
-         <height>431</height>
+         <height>433</height>
         </rect>
        </property>
       </widget>

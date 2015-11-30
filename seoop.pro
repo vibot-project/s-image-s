@@ -35,8 +35,11 @@ LIBS += -L/usr/local/lib \
 }
 
 win32 {
-    #LIBS += opencv libs
-    #LIBS += eigen libs
+INCLUDEPATH += C:\opencv\opencv\mingw\install\include
+LIBS += -L"C:/opencv/opencv/mingw/install/x64/mingw/bin"
+LIBS += -lopencv_core2411 -lopencv_highgui2411 -lopencv_imgproc2411
+
+INCLUDEPATH += C:\eigen
 }
 
 CONFIG += c++11

@@ -15,10 +15,94 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->scrollArea->setHorizontalScrollBarPolicy(Qt::ScrollBarAsNeeded);
     ui->scrollArea->setVerticalScrollBarPolicy(Qt::ScrollBarAsNeeded);
     ui->scrollArea->setWidget(imageLabel);
+    buttonpro = true;
+    select = true;
 
     //imload = new ImageLoad("../seoop/images/", "lena.jpg", CV_LOAD_IMAGE_COLOR);
-    imload = new ImageLoad("/Users/Songyou/Desktop/Samples/", "lena.jpg", CV_LOAD_IMAGE_COLOR);
+//    imload = new ImageLoad("/Users/Songyou/Desktop/Samples/", "lena.jpg", CV_LOAD_IMAGE_COLOR);
 
+    ui->process->setEnabled(false);
+    ui->algstart->setEnabled(false);
+    ui->ground->setEnabled(false);
+    ui->horizontalSlider->setEnabled(false);
+    ui->saveButton->setEnabled(false);
+    /*
+     * TODO: for gui:
+     * zoom in, zoom out, fit to window, or horizontal slider,
+     * open file, save, close
+     * seeds palette
+    */
+}
+
+MainWindow::~MainWindow()
+{
+//    delete imload;
+//    delete context;
+//    delete algo;
+    delete ui;
+}
+
+void MainWindow::on_Button_open_clicked()
+{
+    QStringList mimeTypeFilters;
+    foreach (const QByteArray &mimeTypeName, QImageReader::supportedMimeTypes())
+        mimeTypeFilters.append(mimeTypeName);
+    mimeTypeFilters.sort();
+    const QStringList picturesLocations = QStandardPaths::standardLocations(QStandardPaths::PicturesLocation);
+    QFileDialog dialog(this, tr("Open File"),
+                       picturesLocations.isEmpty() ? QDir::currentPath() : picturesLocations.first());
+    dialog.setAcceptMode(QFileDialog::AcceptOpen);
+    dialog.setMimeTypeFilters(mimeTypeFilters);
+    dialog.selectMimeTypeFilter("image/jpeg");
+
+    while (dialog.exec() == QDialog::Accepted && !loadImg(dialog.selectedFiles().first())) {}
+}
+
+bool MainWindow::loadImg(const QString &fileName)
+{
+    QImage image(fileName);
+    if (image.isNull()) {
+        QMessageBox::information(this, QGuiApplication::applicationDisplayName(),
+                                 tr("Cannot load %1.").arg(QDir::toNativeSeparators(fileName)));
+        setWindowFilePath(QString());
+        imageLabel->setPixmap(QPixmap());
+        ui->Button_open->setEnabled(true);
+        return false;
+    }
+    ui->Button_open->setEnabled(true);
+    ui->process->setEnabled(true);
+    ui->horizontalSlider->setEnabled(true);
+    // set the image in the label
+    imageLabel->setPixmap(QPixmap::fromImage(image));
+    imageLabel->adjustSize();
+    setWindowFilePath(fileName);
+    return true;
+}
+
+void MainWindow::on_horizontalSlider_valueChanged(int value)
+{
+    if (!imageLabel->pixmap()) {
+        qDebug() << "Image label is empty!";
+        return;
+    }
+    double factor;
+    if(value>5)
+    {
+    factor = value*0.2;
+    imageLabel->resize(factor * imageLabel->pixmap()->size());
+    }
+    else
+    {
+    factor = value*0.2;
+    imageLabel->resize(factor * imageLabel->pixmap()->size());
+    }
+    ui->scrollArea->horizontalScrollBar()->setValue(int(factor * ui->scrollArea->horizontalScrollBar()->value() + ((factor - 1) * ui->scrollArea->horizontalScrollBar()->pageStep()/2)));
+    ui->scrollArea->verticalScrollBar()->setValue(int(factor * ui->scrollArea->verticalScrollBar()->value() + ((factor - 1) * ui->scrollArea->verticalScrollBar()->pageStep()/2)));
+}
+
+
+void MainWindow::on_algstart_clicked()
+{
     context = new WorkingContext(imload->getImage(),
                                  imload->getFgSeeds(),
                                  imload->getBgSeeds());
@@ -40,28 +124,6 @@ MainWindow::MainWindow(QWidget *parent) :
             }
         }
     showImage(image_c);
-    /*
-     * TODO: for gui:
-     * zoom in, zoom out, fit to window, or horizontal slider,
-     * open file, save, close
-     * seeds palette
-    */
-}
-
-void MainWindow::scaleImage(double factor)
-{
-    if (!imageLabel->pixmap()) {
-        qDebug() << "Image label is empty!";
-        return;
-    }
-    imageLabel->resize(factor * imageLabel->pixmap()->size());
-    adjustScrollBar(ui->scrollArea->horizontalScrollBar(), factor);
-    adjustScrollBar(ui->scrollArea->verticalScrollBar(), factor);
-}
-
-void MainWindow::adjustScrollBar(QScrollBar *scrollBar, double factor)
-{
-    scrollBar->setValue(int(factor * scrollBar->value() + ((factor - 1) * scrollBar->pageStep()/2)));
 }
 
 void MainWindow::showImage(const cv::Mat &pimage)
@@ -82,13 +144,56 @@ void MainWindow::showImage(const cv::Mat &pimage)
         qDebug()<<"Error: wrong image format";
     }
     imageLabel->setPixmap(QPixmap::fromImage(qimage));
-    scaleImage(5.0);
+//    scaleImage(5.0);
 }
 
-MainWindow::~MainWindow()
+
+void MainWindow::on_process_clicked()
 {
-    delete imload;
-    delete context;
-    delete algo;
-    delete ui;
+    if(buttonpro==true)
+    {
+        ui->Button_open->setEnabled(false);
+        ui->horizontalSlider->setEnabled(false);
+        ui->ground->setEnabled(true);
+        ui->process->setText("Reset");
+        buttonpro= false;
+    }
+    else
+    {
+        ui->Button_open->setEnabled(true);
+        ui->process->setEnabled(false);
+        ui->horizontalSlider->setEnabled(false);
+        ui->algstart->setEnabled(false);
+        ui->ground->setEnabled(false);
+        ui->saveButton->setEnabled(false);
+        ui->process->setText("Process");
+        buttonpro = true;
+    }
+}
+
+void MainWindow::on_ground_clicked()
+{
+    ui->algstart->setEnabled(true);
+    if(select==true)
+    {
+        ui->Button_open->setEnabled(false);
+        ui->horizontalSlider->setEnabled(false);
+        ui->ground->setText("Background");
+        select = false;
+    }
+    else
+    {
+        ui->Button_open->setEnabled(false);
+        ui->horizontalSlider->setEnabled(false);
+        ui->ground->setText("Foreground");
+        select = true;
+    }
+}
+
+void MainWindow::mouseMoveEvent( QMouseEvent* event )
+{
+
+    int x = event->x();
+    int y = event->y();
+    qDebug()<< x << y;
 }
