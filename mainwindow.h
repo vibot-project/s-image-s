@@ -18,8 +18,6 @@ class MainWindow : public QMainWindow
 {
     Q_OBJECT
 
-    bool buttonpro,select;
-
 public:
     explicit MainWindow(QWidget *parent = 0);
     ~MainWindow();
@@ -36,6 +34,9 @@ private slots:
     void on_process_clicked();
 
     void on_ground_clicked();
+    void mouseMoveEvent(QMouseEvent *event);
+//    void paintEvent(QPaintEvent *);
+
 
 private:
     QLabel *imageLabel;
@@ -43,9 +44,12 @@ private:
     ImageLoad *imload;
     WorkingContext *context;
     Algorithm *algo;
-
+    int xpoint,ypoint;
+    QImage timage,rimage;
+    QPen paintpen;
+    bool buttonpro,select,paint;
     void showImage(const cv::Mat &image);
-    void mouseMoveEvent( QMouseEvent* event );
+
 };
 
 #endif // MAINWINDOW_H

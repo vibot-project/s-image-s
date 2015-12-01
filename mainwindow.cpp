@@ -17,6 +17,7 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->scrollArea->setWidget(imageLabel);
     buttonpro = true;
     select = true;
+    paint = false;
 
     //imload = new ImageLoad("../seoop/images/", "lena.jpg", CV_LOAD_IMAGE_COLOR);
 //    clock_t t1, t2;
@@ -78,11 +79,13 @@ bool MainWindow::loadImg(const QString &fileName)
         ui->Button_open->setEnabled(true);
         return false;
     }
+    timage = image;
+    rimage = image;
     ui->Button_open->setEnabled(true);
     ui->process->setEnabled(true);
     ui->horizontalSlider->setEnabled(true);
     // set the image in the label
-    imageLabel->setPixmap(QPixmap::fromImage(image));
+    imageLabel->setPixmap(QPixmap::fromImage(timage));
     imageLabel->adjustSize();
     setWindowFilePath(fileName);
     return true;
@@ -133,7 +136,6 @@ void MainWindow::on_algstart_clicked()
             }
         }
     cv::imshow("asdasdasd", image_c);
-    //showImage(image_c);
 }
 
 void MainWindow::showImage(const cv::Mat &pimage)
@@ -165,18 +167,25 @@ void MainWindow::on_process_clicked()
         ui->horizontalSlider->setEnabled(false);
         ui->ground->setEnabled(true);
         ui->process->setText("Reset");
+        ui->horizontalSlider->setValue(5);
         buttonpro= false;
+        paint = true;
     }
     else
     {
         ui->Button_open->setEnabled(true);
-        ui->process->setEnabled(false);
-        ui->horizontalSlider->setEnabled(false);
+        ui->process->setEnabled(true);
+        ui->horizontalSlider->setEnabled(true);
         ui->algstart->setEnabled(false);
         ui->ground->setEnabled(false);
         ui->saveButton->setEnabled(false);
         ui->process->setText("Process");
+        timage = rimage;
+        imageLabel->setPixmap(QPixmap::fromImage(timage));
+        ui->ground->setText("Foreground");
+        select = true;
         buttonpro = true;
+        paint = false;
     }
 }
 
@@ -199,10 +208,33 @@ void MainWindow::on_ground_clicked()
     }
 }
 
-void MainWindow::mouseMoveEvent( QMouseEvent* event )
+void MainWindow::mouseMoveEvent(QMouseEvent *event)
 {
-
-    int x = event->x();
-    int y = event->y();
-    qDebug()<< x << y;
+    xpoint = event->x();
+    ypoint = event->y();
+    xpoint = xpoint - ui->scrollArea->geometry().x();
+    ypoint = ypoint - ui->scrollArea->geometry().y();
+    if((xpoint>0)&&(xpoint<imageLabel->geometry().width())&&(ypoint>0)&&(ypoint<imageLabel->geometry().height()))
+    if(paint == true)
+    {
+//    QImage image(imageLabel->pixmap()->toImage());
+    QPainter painter(&timage);
+    if(select == true)
+    {
+    paintpen.setColor(Qt::red);
+    paintpen.setWidth(4);
+    }
+    else
+    {
+    paintpen.setColor(Qt::green);
+    paintpen.setWidth(4);
+    }
+    QPoint p1;
+    p1.setX(xpoint);
+    p1.setY(ypoint);
+    painter.setPen(paintpen);
+    painter.drawPoint(p1);
+    imageLabel->setPixmap(QPixmap::fromImage(timage));
+    }
 }
+
