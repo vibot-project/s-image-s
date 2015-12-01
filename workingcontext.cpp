@@ -7,6 +7,7 @@ const int WorkingContext::dx[] = {1, 0, -1, 0};
 const int WorkingContext::dy[] = {0, 1, 0, -1};
 const double WorkingContext::eps = 0.000001;
 
+
 WorkingContext::WorkingContext(const cv::Mat &image,
                                const cv::Mat &fgSeeds,
                                const cv::Mat &bgSeeds,
@@ -48,12 +49,18 @@ Eigen::VectorXd WorkingContext::getB()
 void WorkingContext::declareSparse(int N, int M)
 {
     Wij.resize(N*M, N*M);
-    Wij.reserve(N*M*4);
+    //Wij.reserve(N*M*4);
     D.resize(N*M, N*M);
-    D.reserve(N*M);
+    //D.reserve(N*M);
     Is.resize(N*M, N*M);
-    Is.reserve(N*M);
+    //Is.reserve(N*M);
     b.resize(N*M);
+
+    L.resize(N * M, N * M);
+    Wij.reserve(Eigen::VectorXf::Constant(N * M, 4));
+    D.reserve(Eigen::VectorXf::Constant(N * M, 1));
+    Is.reserve(Eigen::VectorXf::Constant(N * M, 1));
+    L.reserve(Eigen::VectorXf::Constant(N * M, 5));
 }
 
 void WorkingContext::initSeeds(const cv::Mat &fgSeeds, const cv::Mat &bgSeeds)
@@ -101,7 +108,7 @@ void WorkingContext::initSparse(const cv::Mat &image)
     D.setFromTriplets(DTriplet.begin(), DTriplet.end());
     Is.setFromTriplets(IsTriplet.begin(), IsTriplet.end());
     L = D - Wij;
-    L = L * L;
-    A = Is + L;
+    //L = L * L;
+    A = Is + L * L;
 }
 

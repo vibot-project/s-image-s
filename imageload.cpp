@@ -3,8 +3,8 @@
 ImageLoad::ImageLoad(std::string filepath, std::string filename, int flags = CV_LOAD_IMAGE_COLOR)
 {
     this->image = cv::imread(filepath+filename, flags);
-    this->fgSeeds = cv::imread(filepath+"f.jpg", CV_LOAD_IMAGE_GRAYSCALE);
-    this->bgSeeds = cv::imread(filepath+"b.jpg", CV_LOAD_IMAGE_GRAYSCALE);
+    this->fgSeeds = cv::imread(filepath+"pf.jpg", CV_LOAD_IMAGE_GRAYSCALE);
+    this->bgSeeds = cv::imread(filepath+"pb.jpg", CV_LOAD_IMAGE_GRAYSCALE);
     if(this->image.empty() || this->fgSeeds.empty() || this->bgSeeds.empty()){
         qDebug() << "IMAGE_LOAD: Image is not loaded!";
     }
