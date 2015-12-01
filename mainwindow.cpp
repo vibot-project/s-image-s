@@ -133,7 +133,7 @@ void MainWindow::on_algstart_clicked()
             }
         }
     cv::imshow("asdasdasd", image_c);
-    showImage(image_c);
+    //showImage(image_c);
 }
 
 void MainWindow::showImage(const cv::Mat &pimage)
@@ -154,7 +154,6 @@ void MainWindow::showImage(const cv::Mat &pimage)
         qDebug()<<"Error: wrong image format";
     }
     imageLabel->setPixmap(QPixmap::fromImage(qimage));
-    scaleImage(10.0);
 }
 
 
