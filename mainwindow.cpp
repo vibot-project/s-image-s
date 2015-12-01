@@ -19,8 +19,17 @@ MainWindow::MainWindow(QWidget *parent) :
     select = true;
 
     //imload = new ImageLoad("../seoop/images/", "lena.jpg", CV_LOAD_IMAGE_COLOR);
-    //imload = new ImageLoad("/Users/Songyou/Desktop/Samples/", "lena.jpg", CV_LOAD_IMAGE_COLOR);
+//    clock_t t1, t2;
+//    t1 = clock();
+//    //imload = new ImageLoad("/Users/Songyou/Desktop/Samples/", "parka.jpg", CV_LOAD_IMAGE_COLOR);
+//    //on_algstart_clicked();
 
+//    t2 = clock();
+//    float diff ((float)t2-(float)t1);
+//    float seconds = diff / CLOCKS_PER_SEC;
+//    std::cout<<seconds<< "s" <<std::endl;
+
+    //qDebug() << time(0);
     ui->process->setEnabled(false);
     ui->algstart->setEnabled(false);
     ui->ground->setEnabled(false);
@@ -123,6 +132,7 @@ void MainWindow::on_algstart_clicked()
                 image_c.at<cv::Vec3f>(i, j) = noir;
             }
         }
+    cv::imshow("asdasdasd", image_c);
     showImage(image_c);
 }
 

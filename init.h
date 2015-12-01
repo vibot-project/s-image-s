@@ -23,5 +23,7 @@
 #include <set>
 #include <QDebug>
 
+#include <time.h>
+
 #endif // INIT
 
