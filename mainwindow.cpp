@@ -70,11 +70,13 @@ bool MainWindow::loadImg(const QString &fileName)
         ui->Button_open->setEnabled(true);
         return false;
     }
+    timage = image;
+    rimage = image;
     ui->Button_open->setEnabled(true);
     ui->process->setEnabled(true);
     ui->horizontalSlider->setEnabled(true);
     // set the image in the label
-    imageLabel->setPixmap(QPixmap::fromImage(image));
+    imageLabel->setPixmap(QPixmap::fromImage(timage));
     imageLabel->adjustSize();
     setWindowFilePath(fileName);
     return true;
@@ -107,24 +109,24 @@ void MainWindow::on_algstart_clicked()
     context = new WorkingContext(imload->getImage(),
                                  imload->getFgSeeds(),
                                  imload->getBgSeeds());
-    algo = new Algorithm();
-    Eigen::VectorXd x = algo->solver(context->getA(), context->getB());
+//    algo = new Algorithm();
+//    Eigen::VectorXd x = algo->solver(context->getA(), context->getB());
 
-    qDebug() << "Applying new labels (colors)";
-    cv::Mat image = imload->getImage();//(context->getRows(), context->getCols(), CV_32FC3);
-    cv::Mat image_c(image.rows, image.cols, image.type());
-    cv::Vec3f noir;
-    noir[0] = 0.; noir[1] = 0.; noir[2] = 0.;
-    for(int i = 0; i < context->getRows(); i++)
-        for(int j = 0; j < context->getCols(); j++){
-            if(x(i*context->getCols()+j)<(3.+1.)/2.){
-                image_c.at<cv::Vec3f>(i,j) = image.at<cv::Vec3f>(i,j);
+//    qDebug() << "Applying new labels (colors)";
+//    cv::Mat image = imload->getImage();//(context->getRows(), context->getCols(), CV_32FC3);
+//    cv::Mat image_c(image.rows, image.cols, image.type());
+//    cv::Vec3f noir;
+//    noir[0] = 0.; noir[1] = 0.; noir[2] = 0.;
+//    for(int i = 0; i < context->getRows(); i++)
+//        for(int j = 0; j < context->getCols(); j++){
+//            if(x(i*context->getCols()+j)<(3.+1.)/2.){
+//                image_c.at<cv::Vec3f>(i,j) = image.at<cv::Vec3f>(i,j);
 
-            } else {
-                image_c.at<cv::Vec3f>(i, j) = noir;
-            }
-        }
-    showImage(image_c);
+//            } else {
+//                image_c.at<cv::Vec3f>(i, j) = noir;
+//            }
+//        }
+//    showImage(image_c);
 }
 
 void MainWindow::showImage(const cv::Mat &pimage)
@@ -157,18 +159,23 @@ void MainWindow::on_process_clicked()
         ui->horizontalSlider->setEnabled(false);
         ui->ground->setEnabled(true);
         ui->process->setText("Reset");
+        ui->horizontalSlider->setValue(5);
         buttonpro= false;
         paint = true;
     }
     else
     {
         ui->Button_open->setEnabled(true);
-        ui->process->setEnabled(false);
-        ui->horizontalSlider->setEnabled(false);
+        ui->process->setEnabled(true);
+        ui->horizontalSlider->setEnabled(true);
         ui->algstart->setEnabled(false);
         ui->ground->setEnabled(false);
         ui->saveButton->setEnabled(false);
         ui->process->setText("Process");
+        timage = rimage;
+        imageLabel->setPixmap(QPixmap::fromImage(timage));
+        ui->ground->setText("Foreground");
+        select = true;
         buttonpro = true;
         paint = false;
     }
@@ -202,9 +209,8 @@ void MainWindow::mouseMoveEvent(QMouseEvent *event)
     if((xpoint>0)&&(xpoint<imageLabel->geometry().width())&&(ypoint>0)&&(ypoint<imageLabel->geometry().height()))
     if(paint == true)
     {
-        qDebug() << xpoint << ypoint;
-    QImage image(imageLabel->pixmap()->toImage());
-    QPainter painter(&image);
+//    QImage image(imageLabel->pixmap()->toImage());
+    QPainter painter(&timage);
     if(select == true)
     {
     paintpen.setColor(Qt::red);
@@ -220,7 +226,7 @@ void MainWindow::mouseMoveEvent(QMouseEvent *event)
     p1.setY(ypoint);
     painter.setPen(paintpen);
     painter.drawPoint(p1);
-    imageLabel->setPixmap(QPixmap::fromImage(image));
+    imageLabel->setPixmap(QPixmap::fromImage(timage));
     }
 }
 

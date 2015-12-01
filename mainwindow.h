@@ -45,6 +45,7 @@ private:
     WorkingContext *context;
     Algorithm *algo;
     int xpoint,ypoint;
+    QImage timage,rimage;
     QPen paintpen;
     bool buttonpro,select,paint;
     void showImage(const cv::Mat &image);
