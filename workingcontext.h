@@ -47,6 +47,8 @@ public:
     int getRows();
     int getCols();
     cv::Mat getSegmentation();
+
+    ~WorkingContext();
 };
 
 #endif // WORKINGCONTEXT_H

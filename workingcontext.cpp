@@ -24,19 +24,10 @@ WorkingContext::WorkingContext(const cv::Mat &image,
     }
 }
 
-int WorkingContext::getRows()
-{
-    return this->rows;
-}
-
-int WorkingContext::getCols()
-{
-    return this->cols;
-}
-
 cv::Mat WorkingContext::getSegmentation(){
     x = Algorithm::solver(A, b);
     qDebug() << "Applying new labels (colors)";
+    qDebug() << Xb << Xf << endl;
     for(int i = 0; i < rows; i++)
         for(int j = 0; j < cols; j++)
             if(x(i*cols+j) < (Xb+Xf)/2.){
@@ -44,8 +35,13 @@ cv::Mat WorkingContext::getSegmentation(){
                 initialImage.at<cv::Vec3f>(i,j)[1] = 0;
                 initialImage.at<cv::Vec3f>(i,j)[2] = 0;
             }
-    cv::imshow("asdasdasd", initialImage);
     return initialImage;
+}
+
+WorkingContext::~WorkingContext()
+{
+    fseeds.clear();
+    bseeds.clear();
 }
 
 void WorkingContext::declareSparse(int N, int M)
@@ -91,8 +87,9 @@ void WorkingContext::initSparse(const cv::Mat &image)
             } else if(bseeds.count(i*cols+j) != 0){
                 b(i*cols+j) = Xb;
                 Is.insert(i*cols+j, i*cols+j) = 1.;
-            } else
+            } else {
                 b(i*cols+j) = 0;
+            }
         }
     }
     L = D - Wij;

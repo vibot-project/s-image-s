@@ -32,8 +32,8 @@ MainWindow::MainWindow(QWidget *parent) :
 
 MainWindow::~MainWindow()
 {
+//    delete imageLabel;
 //    delete context;
-//    delete algo;
     delete ui;
 }
 
@@ -63,16 +63,17 @@ bool MainWindow::loadImg(const QString &fileName)
         return false;
     }
     cvimage = cv::imread(fileName.toStdString());
+    cvimage.convertTo(cvimage, CV_32F);
     timage = image;
     rimage = image;
     ui->Button_open->setEnabled(true);
     ui->process->setEnabled(true);
     ui->horizontalSlider->setEnabled(true);
     // set the image in the label
-//    imageLabel->setPixmap(QPixmap::fromImage(timage));
-//    imageLabel->adjustSize();
-//    setWindowFilePath(fileName);
-    showImage(cvimage);
+    imageLabel->setPixmap(QPixmap::fromImage(timage));
+    imageLabel->adjustSize();
+    setWindowFilePath(fileName);
+    //showImage(cvimage);
     return true;
 }
 
@@ -92,7 +93,7 @@ void MainWindow::on_horizontalSlider_valueChanged(int value)
 
 void MainWindow::on_algstart_clicked()
 {
-    context = new WorkingContext(cvimage, fseeds, bseeds, 0.1, 0.001, 3.0, 1.0);
+    context = new WorkingContext(cvimage, fseeds, bseeds, 0.1, 0.0001, 3.0, 1.0);
     cv::Mat __image = context->getSegmentation();
     showImage(__image);
 }
@@ -100,7 +101,7 @@ void MainWindow::on_algstart_clicked()
 void MainWindow::showImage(const cv::Mat &pimage)
 {
     cv::Mat image = pimage.clone();
-    image.convertTo(image, CV_8SC3);
+    image.convertTo(image, CV_8U);
     QImage qimage;
     if( image.channels() == 3)
         qimage = QImage((const unsigned char*)(image.data),
@@ -180,12 +181,12 @@ void MainWindow::mouseMoveEvent(QMouseEvent *event)
             if(select == true)
             {
                 paintpen.setColor(Qt::red);
-                paintpen.setWidth(4);
+                paintpen.setWidth(1);
             }
             else
             {
                 paintpen.setColor(Qt::green);
-                paintpen.setWidth(4);
+                paintpen.setWidth(1);
             }
             QPoint p1;
             p1.setX(xpoint);
@@ -193,6 +194,7 @@ void MainWindow::mouseMoveEvent(QMouseEvent *event)
             painter.setPen(paintpen);
             painter.drawPoint(p1);
             imageLabel->setPixmap(QPixmap::fromImage(timage));
+            qDebug() << xpoint << ypoint;
             if(select)
                 fseeds.insert(std::make_pair(ypoint, xpoint));
             else

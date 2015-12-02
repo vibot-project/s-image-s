@@ -33,14 +33,13 @@ private:
     QLabel                              *imageLabel;
     Ui::MainWindow                      *ui;
     WorkingContext                      *context;
-    Algorithm                           *algo;
     int                                 xpoint;
     int                                 ypoint;
     QImage                              timage;
     QImage                              rimage;
     cv::Mat                             cvimage;
-    std::set<std::pair<int,int> >            fseeds;
-    std::set<std::pair<int,int> >            bseeds;
+    std::set<std::pair<int,int> >       fseeds;
+    std::set<std::pair<int,int> >       bseeds;
     QPen                                paintpen;
     bool                                buttonpro;
     bool                                select;
