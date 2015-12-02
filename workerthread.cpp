@@ -1,7 +1,4 @@
 #include "workerthread.h"
 
-WorkerThread::WorkerThread()
-{
-
+WorkerThread::WorkerThread(){
 }
-

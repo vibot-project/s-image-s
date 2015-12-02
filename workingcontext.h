@@ -26,6 +26,9 @@ private:
     Eigen::SparseMatrix <double> Is;                        //diagonal matrix of seeds (pixel in bseeds || pixel in fseeds):1 ? 0
     Eigen::SparseMatrix <double> L;
     Eigen::SparseMatrix <double> A;
+    std::vector <Eigen::Triplet <double> > WijTriplet;
+    std::vector <Eigen::Triplet <double> > DTriplet;
+    std::vector <Eigen::Triplet <double> > IsTriplet;
     Eigen::VectorXd b;                                             //b[i] = Xb if i in bseeds; elseif i in fseeds b[i] = Xf; else b[i] = 0;
     Eigen::VectorXd x;
     std::set <int> fseeds;
@@ -33,10 +36,13 @@ private:
 
     cv::Mat initialImage;
 
+    void init(const cv::Mat &image, const std::set<std::pair<int,int> > &fgSeeds, const std::set<std::pair<int,int> > &bgSeeds);
     void declareSparse(int, int);
     void initSeeds(const std::set<std::pair<int,int> > &fgSeeds, const std::set<std::pair<int,int> > &bgSeeds);
     void initSparse(const cv::Mat &image);
 public:
+    WorkingContext();
+    WorkingContext(const WorkingContext& context);
     WorkingContext(const cv::Mat &image,
                    const std::set<std::pair<int,int> > &fgSeeds,
                    const std::set<std::pair<int,int> > &bgSeeds,

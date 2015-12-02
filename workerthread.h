@@ -2,14 +2,14 @@
 #define WORKERTHREAD_H
 
 #include "init.h"
+#include "workingcontext.h"
 #include <QMutex>
+#include <QWaitCondition>
+#include <QThread>
+#include <QTime>
 
-class WorkerThread
-{
-private:
-    QMutex mute;
+class WorkerThread{
 public:
     WorkerThread();
 };
-
 #endif // WORKERTHREAD_H
