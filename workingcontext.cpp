@@ -1,16 +1,13 @@
 #include "workingcontext.h"
 
-
-//using WorkingContext::dx;
-//using WorkingContext::dy;
 const int WorkingContext::dx[] = {1, 0, -1, 0};
 const int WorkingContext::dy[] = {0, 1, 0, -1};
 const double WorkingContext::eps = 0.000001;
 
 
 WorkingContext::WorkingContext(const cv::Mat &image,
-                               const cv::Mat &fgSeeds,
-                               const cv::Mat &bgSeeds,
+                               const std::set<std::pair<int,int> > &fgSeeds,
+                               const std::set<std::pair<int,int> > &bgSeeds,
                                const double &_sigma,
                                const double &_beta,
                                const double &_Xb,
@@ -18,97 +15,88 @@ WorkingContext::WorkingContext(const cv::Mat &image,
 {
     if(!image.empty() && !fgSeeds.empty() && !bgSeeds.empty())
     {
-        N = image.rows;
-        M = image.cols;
-        declareSparse(N, M);
+        initialImage = image.clone();
+        rows = image.rows;
+        cols = image.cols;
+        declareSparse(rows, cols);
         initSeeds(fgSeeds, bgSeeds);
         initSparse(image);
     }
 }
 
-Eigen::SparseMatrix<double> WorkingContext::getA()
-{
-    return this->A;
-}
-
 int WorkingContext::getRows()
 {
-    return this->N;
+    return this->rows;
 }
 
 int WorkingContext::getCols()
 {
-    return this->M;
+    return this->cols;
 }
 
-Eigen::VectorXd WorkingContext::getB()
-{
-    return this->b;
+cv::Mat WorkingContext::getSegmentation(){
+    x = Algorithm::solver(A, b);
+    qDebug() << "Applying new labels (colors)";
+    for(int i = 0; i < rows; i++)
+        for(int j = 0; j < cols; j++)
+            if(x(i*cols+j) < (Xb+Xf)/2.){
+                initialImage.at<cv::Vec3f>(i,j)[0] = 0;
+                initialImage.at<cv::Vec3f>(i,j)[1] = 0;
+                initialImage.at<cv::Vec3f>(i,j)[2] = 0;
+            }
+    cv::imshow("asdasdasd", initialImage);
+    return initialImage;
 }
 
 void WorkingContext::declareSparse(int N, int M)
 {
     Wij.resize(N*M, N*M);
-    //Wij.reserve(N*M*4);
     D.resize(N*M, N*M);
-    //D.reserve(N*M);
     Is.resize(N*M, N*M);
-    //Is.reserve(N*M);
+    L.resize(N * M, N * M);
     b.resize(N*M);
 
-    L.resize(N * M, N * M);
     Wij.reserve(Eigen::VectorXf::Constant(N * M, 4));
     D.reserve(Eigen::VectorXf::Constant(N * M, 1));
     Is.reserve(Eigen::VectorXf::Constant(N * M, 1));
     L.reserve(Eigen::VectorXf::Constant(N * M, 5));
 }
 
-void WorkingContext::initSeeds(const cv::Mat &fgSeeds, const cv::Mat &bgSeeds)
+void WorkingContext::initSeeds(const std::set<std::pair<int,int> > &fgSeeds, const std::set<std::pair<int,int> > &bgSeeds)
 {
-    for(int i = 0; i < N; i++)
-        for(int j = 0; j < M; j++){
-            int colorB = int(bgSeeds.at<uchar>(i, j));
-            int colorF = int(fgSeeds.at<uchar>(i, j));
-            if(colorB < 200){
-                seeds.insert(i*M+j);
-                bseeds.insert(i*M+j);
-            }
-            if(colorF < 200){
-                seeds.insert(i*M+j);
-                fseeds.insert(i*M+j);
-            }
-        }
+    for(std::set<std::pair<int,int> > :: iterator it = fgSeeds.begin(); it != fgSeeds.end(); it++)
+        fseeds.insert((it->first)*cols+(it->second));
+    for(std::set<std::pair<int,int> > :: iterator it = bgSeeds.begin(); it != bgSeeds.end(); it++)
+        bseeds.insert((it->first)*cols+(it->second));
 }
 
 void WorkingContext::initSparse(const cv::Mat &image)
 {
-    for(int i = 0; i < N; i++){
-        for(int j = 0; j < M; j++){
+    qDebug() << "initializing sparse...";
+    for(int i = 0; i < rows; i++){
+        for(int j = 0; j < cols; j++){
             double sw = 0.;
             for(int k = 0; k < 4; k++){
-                if((i+dy[k] < 0 || i+dy[k] >= N)||(j+dx[k] < 0 || j+dx[k] >= M)) continue;
+                if((i+dy[k] < 0 || i+dy[k] >= rows)||(j+dx[k] < 0 || j+dx[k] >= cols)) continue;
                 double w;
                 w = cv::norm(image.at<cv::Vec3f>(i, j), image.at<cv::Vec3f>(i+dy[k], j+dx[k]), cv::NORM_INF);
                 w = exp(-(beta*w*w)/(sigma)) + eps;
-                WijTriplet.push_back(Eigen::Triplet<double>(i*M+j, (i+dy[k])*M+j+dx[k], w));
+                Wij.insert(i*cols+j, (i+dy[k])*cols+j+dx[k]) =  w;
                 sw += w;
             }
-            DTriplet.push_back(Eigen::Triplet<double>(i*M+j, i*M+j, sw));
-            seeds.count(i*M+j) != 0 ? IsTriplet.push_back(Eigen::Triplet<double>(i*M+j, i*M+j, 1.)) : IsTriplet.push_back(Eigen::Triplet<double>(i*M+j, i*M+j, 0.));
-            if(fseeds.count(i*M+j) != 0)
-                b(i*M+j) = Xf;
-            else if(bseeds.count(i*M+j) != 0)
-                b(i*M+j) = Xb;
-            else
-                b(i*M+j) = 0;
+            D.insert(i*cols+j, i*cols+j) = sw;
+            if(fseeds.count(i*cols+j) != 0){
+                b(i*cols+j) = Xf;
+                Is.insert(i*cols+j, i*cols+j) = 1.;
+            } else if(bseeds.count(i*cols+j) != 0){
+                b(i*cols+j) = Xb;
+                Is.insert(i*cols+j, i*cols+j) = 1.;
+            } else
+                b(i*cols+j) = 0;
         }
     }
-
-    Wij.setFromTriplets(WijTriplet.begin(), WijTriplet.end());
-    D.setFromTriplets(DTriplet.begin(), DTriplet.end());
-    Is.setFromTriplets(IsTriplet.begin(), IsTriplet.end());
     L = D - Wij;
-    //L = L * L;
     A = Is + L * L;
+    qDebug() << "initializing sparse finished";
 }
 

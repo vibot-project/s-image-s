@@ -1,10 +1,8 @@
 #include "imageload.h"
 
-ImageLoad::ImageLoad(std::string filepath, std::string filename, int flags = CV_LOAD_IMAGE_COLOR)
+ImageLoad::ImageLoad(std::string filename, const std::set<int> &fg, const std::set<int> &bg)
 {
-    this->image = cv::imread(filepath+filename, flags);
-    this->fgSeeds = cv::imread(filepath+"pf.jpg", CV_LOAD_IMAGE_GRAYSCALE);
-    this->bgSeeds = cv::imread(filepath+"pb.jpg", CV_LOAD_IMAGE_GRAYSCALE);
+    image = cv::imread(filename);
     if(this->image.empty() || this->fgSeeds.empty() || this->bgSeeds.empty()){
         qDebug() << "IMAGE_LOAD: Image is not loaded!";
     }
@@ -15,22 +13,25 @@ ImageLoad::ImageLoad(std::string filepath, std::string filename, int flags = CV_
 
 cv::Mat ImageLoad::getImage()
 {
-    return this->image;
+    return image;
 }
 
-cv::Mat ImageLoad::getFgSeeds()
+std::set <int> ImageLoad::getFgSeeds()
 {
-    return this->fgSeeds;
+    return fseeds;
 }
 
-cv::Mat ImageLoad::getBgSeeds()
+std::set <int> ImageLoad::getBgSeeds()
 {
-    return this->bgSeeds;
+    return bseeds;
 }
 
 ImageLoad::~ImageLoad()
 {
-    this->image.release();
-    this->fgSeeds.release();
-    this->bgSeeds.release();
+    image->release();
+    fseeds->clear();
+    bseeds->clear();
+    delete image;
+    delete fseeds;
+    delete bseeds;
 }

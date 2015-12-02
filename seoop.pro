@@ -48,13 +48,11 @@ SOURCES += main.cpp\
         mainwindow.cpp \
     workerthread.cpp \
     algorithm.cpp \
-    imageload.cpp \
     workingcontext.cpp
 
 HEADERS  += mainwindow.h \
     workerthread.h \
     algorithm.h \
-    imageload.h \
     workingcontext.h \
     init.h
 

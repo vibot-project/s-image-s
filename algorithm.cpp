@@ -2,19 +2,19 @@
 
 Algorithm::Algorithm()
 {
-
 }
 
 Eigen::VectorXd Algorithm::solver(const Eigen::SparseMatrix <double> &A, const Eigen::VectorXd &b)
 {
+    static Eigen::SimplicialLDLT<Eigen::SparseMatrix<double> > simplicialSolver;
     qDebug() << "Starting to solve Ax = b";
-    solverA.compute(A);
-    if(solverA.info()!=Eigen::Success){
+    simplicialSolver.compute(A);
+    if(simplicialSolver.info()!=Eigen::Success){
         qDebug() << "Failed to compute A";
     }
     qDebug()<< "Solver computed A successfully";
-    x = solverA.solve(b);
-    if(solverA.info() != Eigen::Success){
+    Eigen::VectorXd x = simplicialSolver.solve(b);
+    if(simplicialSolver.info() != Eigen::Success){
         qDebug()<< "Failed to solve Ax = b";
     }
 

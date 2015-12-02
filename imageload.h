@@ -11,14 +11,14 @@
 class ImageLoad
 {
 private:
-    cv::Mat image;                          //the image to be segmented
-    cv::Mat fgSeeds;                        //foreground seeds
-    cv::Mat bgSeeds;                        //background seeds
+    cv::Mat                 *image;                          //the image to be segmented
+    std::set<int>           *fseeds;                   //foreground seeds coordinates
+    std::set<int>           *bseeds;                   //background seeds coordinates
 public:
-    ImageLoad(std::string, std::string, int);
-    cv::Mat getImage();
-    cv::Mat getFgSeeds();
-    cv::Mat getBgSeeds();
+    ImageLoad(const std::string &filename, const std::set<int> &fg, const std::set<int> &bg);
+    cv::Mat                 getImage();
+    std::set <int>          getFgSeeds();
+    std::set <int>          getBgSeeds();
     ~ImageLoad();
 };
 

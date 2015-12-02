@@ -6,7 +6,6 @@
 #include <QLabel>
 #include <QScrollBar>
 #include "init.h"
-#include "imageload.h"
 #include "workingcontext.h"
 #include "algorithm.h"
 
@@ -22,33 +21,34 @@ public:
     explicit MainWindow(QWidget *parent = 0);
     ~MainWindow();
 
-    bool loadImg(const QString &);
-
 private slots:
-    void on_Button_open_clicked();
-
-    void on_horizontalSlider_valueChanged(int value);
-
-    void on_algstart_clicked();
-
-    void on_process_clicked();
-
-    void on_ground_clicked();
-    void mouseMoveEvent(QMouseEvent *event);
-//    void paintEvent(QPaintEvent *);
-
+    void                on_Button_open_clicked();
+    void                on_horizontalSlider_valueChanged(int value);
+    void                on_algstart_clicked();
+    void                on_process_clicked();
+    void                on_ground_clicked();
+    void                mouseMoveEvent(QMouseEvent *event);
 
 private:
-    QLabel *imageLabel;
-    Ui::MainWindow *ui;
-    ImageLoad *imload;
-    WorkingContext *context;
-    Algorithm *algo;
-    int xpoint,ypoint;
-    QImage timage,rimage;
-    QPen paintpen;
-    bool buttonpro,select,paint;
-    void showImage(const cv::Mat &image);
+    QLabel                              *imageLabel;
+    Ui::MainWindow                      *ui;
+    WorkingContext                      *context;
+    Algorithm                           *algo;
+    int                                 xpoint;
+    int                                 ypoint;
+    QImage                              timage;
+    QImage                              rimage;
+    cv::Mat                             cvimage;
+    std::set<std::pair<int,int> >            fseeds;
+    std::set<std::pair<int,int> >            bseeds;
+    QPen                                paintpen;
+    bool                                buttonpro;
+    bool                                select;
+    bool                                paint;
+    clock_t                             timeBegin;
+    clock_t                             timeEnd;
+    void                                showImage(const cv::Mat &image);
+    bool                                loadImg(const QString &);
 
 };
 
