@@ -18,11 +18,6 @@ MainWindow::MainWindow(QWidget *parent) :
     buttonpro = true;
     select = true;
     paint = false;
-//    t1 = clock();
-//    t2 = clock();
-//    float diff ((float)t2-(float)t1);
-//    float seconds = diff / CLOCKS_PER_SEC;
-//    std::cout<<seconds<< "s" <<std::endl;
     ui->process->setEnabled(false);
     ui->algstart->setEnabled(false);
     ui->ground->setEnabled(false);
@@ -173,12 +168,12 @@ void MainWindow::mouseMoveEvent(QMouseEvent *event)
             if(select == true)
             {
                 paintpen.setColor(Qt::red);
-                paintpen.setWidth(1);
+                paintpen.setWidth(4);
             }
             else
             {
                 paintpen.setColor(Qt::green);
-                paintpen.setWidth(1);
+                paintpen.setWidth(4);
             }
             QPoint p1;
             p1.setX(xpoint);
