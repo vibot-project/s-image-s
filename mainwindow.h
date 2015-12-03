@@ -9,6 +9,7 @@
 #include "workingcontext.h"
 #include "workerthread.h"
 #include "algorithm.h"
+#include "labeldraw.h"
 
 namespace Ui {
 class MainWindow;
@@ -31,17 +32,17 @@ private slots:
     void                on_algstart_clicked();
     void                on_process_clicked();
     void                on_ground_clicked();
-    void                mouseMoveEvent(QMouseEvent *event);
+    void                mousePressed();
+    void                mouseMoved();
     void                errorHandler(QString);
 
 private:
-    QLabel                              *imageLabel;
+    LabelDraw                           *imageLabel;
     Ui::MainWindow                      *ui;
-    //WorkingContext                      *context;
     WorkerThread                        *worker;
     QThread                             *thread;
-    int                                 xpoint;
-    int                                 ypoint;
+    int                                 xpointStart, xpointEnd;
+    int                                 ypointStart, ypointEnd;
     QImage                              timage;
     QImage                              rimage;
     cv::Mat                             cvimage;

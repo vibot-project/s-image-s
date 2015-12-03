@@ -7,10 +7,12 @@ MainWindow::MainWindow(QWidget *parent) :
 {
     ui->setupUi(this);
 
-    imageLabel = new QLabel;
+    imageLabel = new LabelDraw;
     imageLabel->setBackgroundRole(QPalette::Dark);
     imageLabel->setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Ignored);
     imageLabel->setScaledContents(true);
+    connect(imageLabel, SIGNAL(mousePressed()), this, SLOT(mousePressed()));
+    connect(imageLabel, SIGNAL(mouseMoved()), this, SLOT(mouseMoved()));
     ui->scrollArea->setBackgroundRole(QPalette::Dark);
     ui->scrollArea->setHorizontalScrollBarPolicy(Qt::ScrollBarAsNeeded);
     ui->scrollArea->setVerticalScrollBarPolicy(Qt::ScrollBarAsNeeded);
@@ -155,13 +157,25 @@ void MainWindow::on_ground_clicked()
     }
 }
 
-void MainWindow::mouseMoveEvent(QMouseEvent *event)
+void MainWindow::mousePressed()
 {
-    xpoint = event->x();
-    ypoint = event->y();
-    xpoint = xpoint - ui->scrollArea->geometry().x();
-    ypoint = ypoint - ui->scrollArea->geometry().y();
-    if((xpoint>0)&&(xpoint<imageLabel->geometry().width())&&(ypoint>0)&&(ypoint<imageLabel->geometry().height()))
+    xpointStart = imageLabel->getX();
+    ypointStart = imageLabel->getY();
+    if((xpointStart>0)&&(xpointStart<imageLabel->geometry().width())&&(ypointStart>0)&&(ypointStart<imageLabel->geometry().height()))
+        if(paint == true)
+        {
+            if(select)
+                fseeds.insert(std::make_pair(ypointStart, xpointStart));
+            else
+                bseeds.insert(std::make_pair(ypointStart, xpointStart));
+        }
+}
+
+void MainWindow::mouseMoved()
+{
+    xpointEnd = imageLabel->getX();
+    ypointEnd = imageLabel->getY();
+    if((xpointEnd>0)&&(xpointEnd<imageLabel->geometry().width())&&(ypointEnd>0)&&(ypointEnd<imageLabel->geometry().height()))
         if(paint == true)
         {
             QPainter painter(&timage);
@@ -175,17 +189,15 @@ void MainWindow::mouseMoveEvent(QMouseEvent *event)
                 paintpen.setColor(Qt::green);
                 paintpen.setWidth(4);
             }
-            QPoint p1;
-            p1.setX(xpoint);
-            p1.setY(ypoint);
             painter.setPen(paintpen);
-            painter.drawPoint(p1);
+            painter.drawLine(xpointStart, ypointStart, xpointEnd, ypointEnd);
+            xpointStart = xpointEnd;
+            ypointStart = ypointEnd;
             imageLabel->setPixmap(QPixmap::fromImage(timage));
-            qDebug() << xpoint << ypoint;
             if(select)
-                fseeds.insert(std::make_pair(ypoint, xpoint));
+                fseeds.insert(std::make_pair(ypointEnd, xpointEnd));
             else
-                bseeds.insert(std::make_pair(ypoint, xpoint));
+                bseeds.insert(std::make_pair(ypointEnd, xpointEnd));
         }
 }
 
