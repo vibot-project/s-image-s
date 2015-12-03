@@ -68,7 +68,6 @@ bool MainWindow::loadImg(const QString &fileName)
     imageLabel->setPixmap(QPixmap::fromImage(timage));
     imageLabel->adjustSize();
     setWindowFilePath(fileName);
-    //showImage(cvimage);
     return true;
 }
 
@@ -88,39 +87,22 @@ void MainWindow::on_horizontalSlider_valueChanged(int value)
 
 void MainWindow::on_algstart_clicked()
 {
-    //    t1 = clock();
-    //    t2 = clock();
-    timeBegin = clock();
-    context = new WorkingContext(cvimage, fseeds, bseeds, 0.1, 0.0001, 3.0, 1.0);
-    cv::Mat __image = context->getSegmentation();
-    showImage(__image);
-    timeEnd = clock();
-    float diff ((float)timeEnd-(float)timeBegin);
-    float seconds = diff / CLOCKS_PER_SEC;
-//    std::cout<<seconds<< "s" <<std::endl;
-
-    //ui->statusBar->addWidget(QLabel(QString("Processing time %1 seconds").arg(seconds)));
-    ui->statusBar->showMessage(QString("Processing time %1 seconds").arg(seconds));
+    thread = new QThread();
+    worker = new WorkerThread(cvimage, fseeds, bseeds, 0.1, 0.0001, 3.0, 1.0);
+    worker->moveToThread(thread);
+    connect(worker, SIGNAL(error(QString)), this, SLOT(errorHandler(QString)));
+    connect(thread, SIGNAL(started()), worker, SLOT(process()));
+    connect(worker, SIGNAL(finished(QImage, QString)), this, SLOT(showImage(QImage, QString)));
+    connect(worker, SIGNAL(finished(QImage, QString)), thread, SLOT(quit()));
+    connect(worker, SIGNAL(finished(QImage, QString)), worker, SLOT(deleteLater()));
+    connect(thread, SIGNAL(finished(QImage, QString)), thread, SLOT(deleteLater()));
+    thread->start();
 }
 
-void MainWindow::showImage(const cv::Mat &pimage)
+void MainWindow::showImage(const QImage &pimage, const QString &message)
 {
-    cv::Mat image = pimage.clone();
-    image.convertTo(image, CV_8U);
-    QImage qimage;
-    if( image.channels() == 3)
-        qimage = QImage((const unsigned char*)(image.data),
-                              image.cols, image.rows,
-                              image.step, QImage::Format_RGB888).rgbSwapped();
-    else if( image.channels() == 1)
-        qimage = QImage((const unsigned char*)(image.data),
-                              image.cols, image.rows,
-                              image.step, QImage::Format_Indexed8);
-    else
-    {
-        qDebug()<<"Error: wrong image format";
-    }
-    imageLabel->setPixmap(QPixmap::fromImage(qimage));
+    imageLabel->setPixmap(QPixmap::fromImage(pimage));
+    ui->statusBar->showMessage(message);
 }
 
 
@@ -205,5 +187,10 @@ void MainWindow::mouseMoveEvent(QMouseEvent *event)
             else
                 bseeds.insert(std::make_pair(ypoint, xpoint));
         }
+}
+
+void MainWindow::errorHandler(QString err)
+{
+    ui->statusBar->showMessage(err);
 }
 

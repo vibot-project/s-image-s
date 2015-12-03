@@ -46,3 +46,4 @@ QImage WorkerThread::convertMat(const cv::Mat &pimage)
 WorkerThread::~WorkerThread()
 {
 }
+>>>>>>> experiments
