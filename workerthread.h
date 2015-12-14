@@ -26,6 +26,7 @@ public slots:
 signals:
     void finished(QImage, QString);
     void error(QString err);
+    void progressEvent(int, QString);
 private:
     WorkingContext *context;
     cv::Mat resultImage;
@@ -39,5 +40,6 @@ private:
     clock_t beginTime;
     clock_t endTime;
     QImage convertMat(const cv::Mat &pimage);
+    void updateProgress(int);
 };
 #endif // WORKERTHREAD_H

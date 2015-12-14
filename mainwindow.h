@@ -25,6 +25,7 @@ public:
 
 public slots:
     void                showImage(const QImage &image, const QString &message);
+    void                progressUpdate(int, QString);
 
 private slots:
     void                on_Button_open_clicked();
@@ -41,6 +42,7 @@ private:
     Ui::MainWindow                      *ui;
     WorkerThread                        *worker;
     QThread                             *thread;
+    QProgressBar                        *progressBar;
     int                                 xpointStart, xpointEnd;
     int                                 ypointStart, ypointEnd;
     QImage                              timage;

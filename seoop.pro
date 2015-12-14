@@ -52,9 +52,9 @@ SOURCES += main.cpp\
     labeldraw.cpp
 
 HEADERS  += mainwindow.h \
+    workingcontext.h \
     workerthread.h \
     algorithm.h \
-    workingcontext.h \
     init.h \
     labeldraw.h
 

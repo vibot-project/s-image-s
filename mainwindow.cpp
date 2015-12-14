@@ -11,6 +11,10 @@ MainWindow::MainWindow(QWidget *parent) :
     imageLabel->setBackgroundRole(QPalette::Dark);
     imageLabel->setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Ignored);
     imageLabel->setScaledContents(true);
+    progressBar = new QProgressBar;
+    progressBar->setValue(0);
+    progressBar->setVisible(false);
+    ui->statusBar->addWidget(progressBar);
     connect(imageLabel, SIGNAL(mousePressed()), this, SLOT(mousePressed()));
     connect(imageLabel, SIGNAL(mouseMoved()), this, SLOT(mouseMoved()));
     ui->scrollArea->setBackgroundRole(QPalette::Dark);
@@ -70,6 +74,7 @@ bool MainWindow::loadImg(const QString &fileName)
     imageLabel->setPixmap(QPixmap::fromImage(timage));
     imageLabel->adjustSize();
     setWindowFilePath(fileName);
+    ui->statusBar->showMessage(QString("Image size: %1x%2").arg(cvimage.cols).arg(cvimage.rows));
     return true;
 }
 
@@ -92,12 +97,13 @@ void MainWindow::on_algstart_clicked()
     thread = new QThread();
     worker = new WorkerThread(cvimage, fseeds, bseeds, 0.1, 0.0001, 3.0, 1.0);
     worker->moveToThread(thread);
+    connect(worker, SIGNAL(progressEvent(int,QString)), this, SLOT(progressUpdate(int,QString)));
     connect(worker, SIGNAL(error(QString)), this, SLOT(errorHandler(QString)));
     connect(thread, SIGNAL(started()), worker, SLOT(process()));
     connect(worker, SIGNAL(finished(QImage, QString)), this, SLOT(showImage(QImage, QString)));
     connect(worker, SIGNAL(finished(QImage, QString)), thread, SLOT(quit()));
     connect(worker, SIGNAL(finished(QImage, QString)), worker, SLOT(deleteLater()));
-    connect(thread, SIGNAL(finished(QImage, QString)), thread, SLOT(deleteLater()));
+    connect(thread, SIGNAL(finished()), thread, SLOT(deleteLater()));
     thread->start();
 }
 
@@ -105,6 +111,16 @@ void MainWindow::showImage(const QImage &pimage, const QString &message)
 {
     imageLabel->setPixmap(QPixmap::fromImage(pimage));
     ui->statusBar->showMessage(message);
+}
+
+void MainWindow::progressUpdate(int value, QString text)
+{
+    progressBar->setFormat(QString("%1: %p%").arg(text));
+    progressBar->setVisible(true);
+    progressBar->setValue(value);
+    if (value==progressBar->maximum()) {
+        progressBar->setVisible(false);
+    }
 }
 
 

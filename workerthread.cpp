@@ -13,13 +13,17 @@ WorkerThread::WorkerThread(const cv::Mat &image,
 void WorkerThread::process()
 {
     beginTime = clock();
+    updateProgress(10);
     context = new WorkingContext(image, fgSeeds, bgSeeds, sigma, beta, Xb, Xf);
+    updateProgress(20);
     resultImage = context->getSegmentation();
+    updateProgress(90);
     QImage qimage;
     qimage = convertMat(resultImage);
     endTime = clock();
     float processTime = (float(endTime) - float(beginTime)) / CLOCKS_PER_SEC;
     QString message = QString("Processed in %1 seconds.").arg(processTime);
+    updateProgress(100);
     emit finished(qimage, message);
 }
 
@@ -41,6 +45,11 @@ QImage WorkerThread::convertMat(const cv::Mat &pimage)
         qDebug()<<"Error: wrong image format";
     }
     return qimage;
+}
+
+void WorkerThread::updateProgress(int value)
+{
+    emit progressEvent(value, QString("Process:"));
 }
 
 WorkerThread::~WorkerThread()
