@@ -31,7 +31,7 @@ cv::Mat WorkingContext::getSegmentation(){
     qDebug() << Xb << Xf << endl;
     for(int i = 0; i < rows; i++)
         for(int j = 0; j < cols; j++)
-            if(x(i*cols+j) < (Xb+Xf)/2.){
+            if(x(i*cols+j) > (Xb+Xf)/2.){
                 initialImage.at<cv::Vec3f>(i,j)[0] = 0;
                 initialImage.at<cv::Vec3f>(i,j)[1] = 0;
                 initialImage.at<cv::Vec3f>(i,j)[2] = 0;

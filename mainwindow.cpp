@@ -22,7 +22,7 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->scrollArea->setVerticalScrollBarPolicy(Qt::ScrollBarAsNeeded);
     ui->scrollArea->setWidget(imageLabel);
     buttonpro = true;
-    select = true;
+    select = 0;
     paint = false;
     ui->process->setEnabled(false);
     ui->algstart->setEnabled(false);
@@ -132,12 +132,17 @@ void MainWindow::on_process_clicked()
         ui->horizontalSlider->setEnabled(false);
         ui->ground->setEnabled(true);
         ui->process->setText("Reset");
+        ui->algstart->setEnabled(true);
         ui->horizontalSlider->setValue(5);
+        select = ui->ground->currentIndex();
+        qDebug() << "select on process:" << select;
         buttonpro= false;
         paint = true;
     }
     else
     {
+        fseeds.clear();
+        bseeds.clear();
         ui->Button_open->setEnabled(true);
         ui->process->setEnabled(true);
         ui->horizontalSlider->setEnabled(true);
@@ -147,29 +152,8 @@ void MainWindow::on_process_clicked()
         ui->process->setText("Process");
         timage = rimage;
         imageLabel->setPixmap(QPixmap::fromImage(timage));
-        ui->ground->setText("Foreground");
-        select = true;
         buttonpro = true;
         paint = false;
-    }
-}
-
-void MainWindow::on_ground_clicked()
-{
-    ui->algstart->setEnabled(true);
-    if(select==true)
-    {
-        ui->Button_open->setEnabled(false);
-        ui->horizontalSlider->setEnabled(false);
-        ui->ground->setText("Background");
-        select = false;
-    }
-    else
-    {
-        ui->Button_open->setEnabled(false);
-        ui->horizontalSlider->setEnabled(false);
-        ui->ground->setText("Foreground");
-        select = true;
     }
 }
 
@@ -180,7 +164,7 @@ void MainWindow::mousePressed()
     if((xpointStart>0)&&(xpointStart<imageLabel->geometry().width())&&(ypointStart>0)&&(ypointStart<imageLabel->geometry().height()))
         if(paint == true)
         {
-            if(select)
+            if(select==1)
                 fseeds.insert(std::make_pair(ypointStart, xpointStart));
             else
                 bseeds.insert(std::make_pair(ypointStart, xpointStart));
@@ -195,7 +179,7 @@ void MainWindow::mouseMoved()
         if(paint == true)
         {
             QPainter painter(&timage);
-            if(select == true)
+            if(select == 0)
             {
                 paintpen.setColor(Qt::red);
                 paintpen.setWidth(4);
@@ -210,7 +194,7 @@ void MainWindow::mouseMoved()
             xpointStart = xpointEnd;
             ypointStart = ypointEnd;
             imageLabel->setPixmap(QPixmap::fromImage(timage));
-            if(select)
+            if(select == 1)
                 fseeds.insert(std::make_pair(ypointEnd, xpointEnd));
             else
                 bseeds.insert(std::make_pair(ypointEnd, xpointEnd));
@@ -222,3 +206,20 @@ void MainWindow::errorHandler(QString err)
     ui->statusBar->showMessage(err);
 }
 
+
+void MainWindow::on_ground_currentIndexChanged(int index)
+{
+    select = index;
+    qDebug() << "selected index:" << select;
+}
+
+void MainWindow::on_uiFgrNum_currentIndexChanged(int index)
+{
+    for(int i = 0; i < index; i++)
+    {
+        QToolButton *btn = new QToolButton();
+        btn->setText(QString("%1").arg(i));
+        ui->colorContainer->addWidget(btn);
+        ui->ground->addItem(QString("Foreground-%1").arg(i+2));
+    }
+}

@@ -32,10 +32,13 @@ private slots:
     void                on_horizontalSlider_valueChanged(int value);
     void                on_algstart_clicked();
     void                on_process_clicked();
-    void                on_ground_clicked();
     void                mousePressed();
     void                mouseMoved();
     void                errorHandler(QString);
+
+    void on_ground_currentIndexChanged(int index);
+
+    void on_uiFgrNum_currentIndexChanged(int index);
 
 private:
     LabelDraw                           *imageLabel;
@@ -52,11 +55,10 @@ private:
     std::set<std::pair<int,int> >       bseeds;
     QPen                                paintpen;
     bool                                buttonpro;
-    bool                                select;
+    int select;
     bool                                paint;
     clock_t                             timeBegin;
     clock_t                             timeEnd;
-    //void                                showImage(const cv::Mat &image);
     bool                                loadImg(const QString &);
 
 };
