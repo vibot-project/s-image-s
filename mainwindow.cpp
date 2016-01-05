@@ -109,24 +109,24 @@ void MainWindow::on_algstart_clicked()
     context = new WorkingContext(imload->getImage(),
                                  imload->getFgSeeds(),
                                  imload->getBgSeeds());
-//    algo = new Algorithm();
-//    Eigen::VectorXd x = algo->solver(context->getA(), context->getB());
+    algo = new Algorithm();
+    Eigen::VectorXd x = algo->solver(context->getA(), context->getB());
 
-//    qDebug() << "Applying new labels (colors)";
-//    cv::Mat image = imload->getImage();//(context->getRows(), context->getCols(), CV_32FC3);
-//    cv::Mat image_c(image.rows, image.cols, image.type());
-//    cv::Vec3f noir;
-//    noir[0] = 0.; noir[1] = 0.; noir[2] = 0.;
-//    for(int i = 0; i < context->getRows(); i++)
-//        for(int j = 0; j < context->getCols(); j++){
-//            if(x(i*context->getCols()+j)<(3.+1.)/2.){
-//                image_c.at<cv::Vec3f>(i,j) = image.at<cv::Vec3f>(i,j);
+    qDebug() << "Applying new labels (colors)";
+    cv::Mat image = imload->getImage();//(context->getRows(), context->getCols(), CV_32FC3);
+    cv::Mat image_c(image.rows, image.cols, image.type());
+    cv::Vec3f noir;
+    noir[0] = 0.; noir[1] = 0.; noir[2] = 0.;
+    for(int i = 0; i < context->getRows(); i++)
+        for(int j = 0; j < context->getCols(); j++){
+            if(x(i*context->getCols()+j)<(3.+1.)/2.){
+                image_c.at<cv::Vec3f>(i,j) = image.at<cv::Vec3f>(i,j);
 
-//            } else {
-//                image_c.at<cv::Vec3f>(i, j) = noir;
-//            }
-//        }
-//    showImage(image_c);
+            } else {
+                image_c.at<cv::Vec3f>(i, j) = noir;
+            }
+        }
+    showImage(image_c);
 }
 
 void MainWindow::showImage(const cv::Mat &pimage)
