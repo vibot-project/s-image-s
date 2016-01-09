@@ -19,6 +19,8 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->ground->addItem(QString("Foreground"));
     connect(imageLabel, SIGNAL(mousePressed()), this, SLOT(mousePressed()));
     connect(imageLabel, SIGNAL(mouseMoved()), this, SLOT(mouseMoved()));
+    connect(ui->actionOpen, SIGNAL(triggered(bool)), this, SLOT(on_Button_open_clicked()));
+    connect(ui->actionSave, SIGNAL(triggered(bool)), this, SLOT(on_saveButton_clicked()));
     ui->scrollArea->setBackgroundRole(QPalette::Dark);
     ui->scrollArea->setHorizontalScrollBarPolicy(Qt::ScrollBarAsNeeded);
     ui->scrollArea->setVerticalScrollBarPolicy(Qt::ScrollBarAsNeeded);
@@ -55,52 +57,62 @@ void MainWindow::on_Button_open_clicked()
     }
     else
     {
-    QStringList mimeTypeFilters;
-    foreach (const QByteArray &mimeTypeName, QImageReader::supportedMimeTypes())
-        mimeTypeFilters.append(mimeTypeName);
-    mimeTypeFilters.sort();
-    const QStringList picturesLocations = QStandardPaths::standardLocations(QStandardPaths::PicturesLocation);
-    QFileDialog dialog(this, tr("Open File"), picturesLocations.isEmpty() ? QDir::currentPath() : picturesLocations.first());
-    dialog.setAcceptMode(QFileDialog::AcceptOpen);
-    dialog.setMimeTypeFilters(mimeTypeFilters);
-    dialog.selectMimeTypeFilter("image/jpeg");
-    while (dialog.exec() == QDialog::Accepted && !loadImg(dialog.selectedFiles().first())) {}
+        QStringList mimeTypeFilters;
+        foreach (const QByteArray &mimeTypeName, QImageReader::supportedMimeTypes())
+            mimeTypeFilters.append(mimeTypeName);
+        mimeTypeFilters.sort();
+        const QStringList picturesLocations = QStandardPaths::standardLocations(QStandardPaths::PicturesLocation);
+        QFileDialog dialog(this, tr("Open File"), picturesLocations.isEmpty() ? QDir::currentPath() : picturesLocations.first());
+        dialog.setAcceptMode(QFileDialog::AcceptOpen);
+        dialog.setMimeTypeFilters(mimeTypeFilters);
+        dialog.selectMimeTypeFilter("image/jpeg");
+        while (dialog.exec() == QDialog::Accepted && !loadImg(dialog.selectedFiles().first())) {}
     }
 }
 
 bool MainWindow::loadImg(const QString &fileName)
 {
     QImage image(fileName);
-    QString maxheight = ui->uiMaxHeight->text();
-    QString maxwidth = ui->uiMaxWidth->text();
-    int height = maxheight.toInt();
-    int width = maxwidth.toInt();
-    if(image.height()<=height&&image.width()<=width)
-    {
-        if (image.isNull()) {
-            QMessageBox::information(this, QGuiApplication::applicationDisplayName(),
-                                     tr("Cannot load %1.").arg(QDir::toNativeSeparators(fileName)));
-            setWindowFilePath(QString());
-            imageLabel->setPixmap(QPixmap());
-            ui->Button_open->setEnabled(true);
-            return false;
-        }
-        cvimage = cv::imread(fileName.toStdString());
-        cvimage.convertTo(cvimage, CV_32F);
-        timage = image;
-        rimage = image;
+    int height = ui->uiMaxHeight->text().toInt();
+    int width = ui->uiMaxWidth->text().toInt();
+    if (image.isNull()) {
+        QMessageBox::information(this, QGuiApplication::applicationDisplayName(),
+                                 tr("Cannot load %1.").arg(QDir::toNativeSeparators(fileName)));
+        setWindowFilePath(QString());
+        imageLabel->setPixmap(QPixmap());
         ui->Button_open->setEnabled(true);
-        ui->process->setEnabled(true);
-        ui->horizontalSlider->setEnabled(true);
-        // set the image in the label
-        imageLabel->setPixmap(QPixmap::fromImage(timage));
-        imageLabel->adjustSize();
-        setWindowFilePath(fileName);
-        ui->statusBar->showMessage(QString("Image size: %1x%2").arg(cvimage.cols).arg(cvimage.rows));
-        return true;
+        return false;
     }
-    QMessageBox::information(this, "Port Value","Enter with in Range");
-    return false;
+    cvimage = cv::imread(fileName.toStdString());
+    int nwidth, nheight;
+    bool changed = false;
+    if(image.width() > width){
+        image = image.scaledToWidth(width);
+        nwidth = image.width();
+        nheight = image.height();
+        changed = true;
+    }
+    if(image.height() > height){
+        image = image.scaledToHeight(height);
+        nwidth = image.width();
+        nheight = image.height();
+        changed = true;
+    }
+    if(changed)
+        cv::resize(cvimage, cvimage, cv::Size(nwidth, nheight));
+    qDebug() << cvimage.cols << cvimage.rows;
+    cvimage.convertTo(cvimage, CV_32F);
+    timage = image;
+    rimage = image;
+    ui->Button_open->setEnabled(true);
+    ui->process->setEnabled(true);
+    ui->horizontalSlider->setEnabled(true);
+    // set the image in the label
+    imageLabel->setPixmap(QPixmap::fromImage(timage));
+    imageLabel->adjustSize();
+    setWindowFilePath(fileName);
+    ui->statusBar->showMessage(QString("Image size: %1x%2").arg(cvimage.cols).arg(cvimage.rows));
+    return true;
 }
 
 void MainWindow::on_horizontalSlider_valueChanged(int value)
@@ -129,6 +141,7 @@ void MainWindow::on_algstart_clicked()
     }
     ui->algstart->setEnabled(false);
     ui->process->setEnabled(false);
+    ui->saveButton->setEnabled(false);
     worker = new WorkerThread(cvimage, fseeds, bseeds, 0.1, 0.0001, 3.0, 1.0);
     worker->moveToThread(thread);
     connect(worker, SIGNAL(progressEvent(int,QString)), this, SLOT(progressUpdate(int,QString)));
@@ -154,6 +167,8 @@ void MainWindow::progressUpdate(int value, QString text)
     if (value==progressBar->maximum()) {
         progressBar->setVisible(false);
         ui->process->setEnabled(true);
+        ui->saveButton->setEnabled(true);
+        ui->actionSave->setEnabled(true);
     }
 }
 
@@ -163,12 +178,15 @@ void MainWindow::on_process_clicked()
     if(buttonpro==true)
     {
         ui->Button_open->setEnabled(false);
+        ui->actionOpen->setEnabled(false);
         ui->uiMaxHeight->setEnabled(false);
         ui->uiMaxWidth->setEnabled(false);
         ui->horizontalSlider->setEnabled(false);
         ui->ground->setEnabled(true);
         ui->process->setText("Reset");
         ui->algstart->setEnabled(true);
+        ui->saveButton->setEnabled(true);
+        ui->actionSave->setEnabled(true);
         ui->horizontalSlider->setValue(5);
         select = ui->ground->currentIndex();
         qDebug() << "select on process:" << select;
@@ -180,6 +198,7 @@ void MainWindow::on_process_clicked()
         fseeds.clear();
         bseeds.clear();
         ui->Button_open->setEnabled(true);
+        ui->actionOpen->setEnabled(true);
         ui->uiMaxHeight->setEnabled(true);
         ui->uiMaxWidth->setEnabled(true);
         ui->process->setEnabled(true);
@@ -187,6 +206,7 @@ void MainWindow::on_process_clicked()
         ui->algstart->setEnabled(false);
         ui->ground->setEnabled(false);
         ui->saveButton->setEnabled(false);
+        ui->actionSave->setEnabled(false);
         ui->process->setText("Process");
         timage = rimage;
         imageLabel->setPixmap(QPixmap::fromImage(timage));
@@ -311,4 +331,29 @@ void MainWindow::on_uiMaxHeight_editingFinished()
     {
         QMessageBox::information(this, "Port Value","Enter Valid Range Vaule");
     }
+}
+
+/**
+ * @brief MainWindow::on_saveButton_clicked
+ * @cite: http://creative-punch.net/2014/02/opening-displaying-saving-images-qt
+ */
+
+void MainWindow::on_saveButton_clicked()
+{
+    QImage image = imageLabel->pixmap()->toImage();
+    if(!image.isNull()){
+        QString imagePath = QFileDialog::getSaveFileName(
+                        this,
+                        tr("Save File"),
+                        "",
+                        tr("JPEG (*.jpg *.jpeg);;PNG (*.png)" )
+                        );
+
+        image.save(imagePath);
+    }
+}
+
+void MainWindow::on_actionQuit_triggered()
+{
+    QApplication::exit(0);
 }
