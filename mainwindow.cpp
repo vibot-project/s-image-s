@@ -15,6 +15,8 @@ MainWindow::MainWindow(QWidget *parent) :
     progressBar->setValue(0);
     progressBar->setVisible(false);
     ui->statusBar->addWidget(progressBar);
+    ui->ground->addItem(QString("Background"));
+    ui->ground->addItem(QString("Foreground"));
     connect(imageLabel, SIGNAL(mousePressed()), this, SLOT(mousePressed()));
     connect(imageLabel, SIGNAL(mouseMoved()), this, SLOT(mouseMoved()));
     ui->scrollArea->setBackgroundRole(QPalette::Dark);
@@ -40,6 +42,17 @@ MainWindow::~MainWindow()
 
 void MainWindow::on_Button_open_clicked()
 {
+    QString maxheight = ui->uiMaxHeight->text();
+    QString maxwidth = ui->uiMaxWidth->text();
+    bool check1,check2;
+    maxheight.toUShort(&check1);
+    maxwidth.toUShort(&check2);
+    if(!(check1&check2))
+    {
+        QMessageBox::information(this, "Port Value","Enter Valid Range Vaule");
+    }
+    else
+    {
     QStringList mimeTypeFilters;
     foreach (const QByteArray &mimeTypeName, QImageReader::supportedMimeTypes())
         mimeTypeFilters.append(mimeTypeName);
@@ -50,11 +63,18 @@ void MainWindow::on_Button_open_clicked()
     dialog.setMimeTypeFilters(mimeTypeFilters);
     dialog.selectMimeTypeFilter("image/jpeg");
     while (dialog.exec() == QDialog::Accepted && !loadImg(dialog.selectedFiles().first())) {}
+    }
 }
 
 bool MainWindow::loadImg(const QString &fileName)
 {
     QImage image(fileName);
+    QString maxheight = ui->uiMaxHeight->text();
+    QString maxwidth = ui->uiMaxWidth->text();
+    int height = maxheight.toInt();
+    int width = maxwidth.toInt();
+    if(image.height()<=height&&image.width()<=width)
+    {
     if (image.isNull()) {
         QMessageBox::information(this, QGuiApplication::applicationDisplayName(),
                                  tr("Cannot load %1.").arg(QDir::toNativeSeparators(fileName)));
@@ -76,6 +96,11 @@ bool MainWindow::loadImg(const QString &fileName)
     setWindowFilePath(fileName);
     ui->statusBar->showMessage(QString("Image size: %1x%2").arg(cvimage.cols).arg(cvimage.rows));
     return true;
+    }
+    else
+    {
+        QMessageBox::information(this, "Port Value","Enter with in Range");
+    }
 }
 
 void MainWindow::on_horizontalSlider_valueChanged(int value)
@@ -94,6 +119,7 @@ void MainWindow::on_horizontalSlider_valueChanged(int value)
 
 void MainWindow::on_algstart_clicked()
 {
+    ui->algstart->setEnabled(false);
     thread = new QThread();
     worker = new WorkerThread(cvimage, fseeds, bseeds, 0.1, 0.0001, 3.0, 1.0);
     worker->moveToThread(thread);
@@ -129,6 +155,8 @@ void MainWindow::on_process_clicked()
     if(buttonpro==true)
     {
         ui->Button_open->setEnabled(false);
+        ui->uiMaxHeight->setEnabled(false);
+        ui->uiMaxWidth->setEnabled(false);
         ui->horizontalSlider->setEnabled(false);
         ui->ground->setEnabled(true);
         ui->process->setText("Reset");
@@ -144,6 +172,8 @@ void MainWindow::on_process_clicked()
         fseeds.clear();
         bseeds.clear();
         ui->Button_open->setEnabled(true);
+        ui->uiMaxHeight->setEnabled(true);
+        ui->uiMaxWidth->setEnabled(true);
         ui->process->setEnabled(true);
         ui->horizontalSlider->setEnabled(true);
         ui->algstart->setEnabled(false);
@@ -184,9 +214,29 @@ void MainWindow::mouseMoved()
                 paintpen.setColor(Qt::red);
                 paintpen.setWidth(4);
             }
-            else
+            else if(select == 1)
             {
                 paintpen.setColor(Qt::green);
+                paintpen.setWidth(4);
+            }
+            else if(select == 2)
+            {
+                paintpen.setColor(Qt::yellow);
+                paintpen.setWidth(4);
+            }
+            else if(select == 3)
+            {
+                paintpen.setColor(Qt::blue);
+                paintpen.setWidth(4);
+            }
+            else if(select == 4)
+            {
+                paintpen.setColor(Qt::black);
+                paintpen.setWidth(4);
+            }
+            else if(select == 5)
+            {
+                paintpen.setColor(Qt::white);
                 paintpen.setWidth(4);
             }
             painter.setPen(paintpen);
@@ -196,8 +246,17 @@ void MainWindow::mouseMoved()
             imageLabel->setPixmap(QPixmap::fromImage(timage));
             if(select == 1)
                 fseeds.insert(std::make_pair(ypointEnd, xpointEnd));
-            else
+            else if(select == 0)
                 bseeds.insert(std::make_pair(ypointEnd, xpointEnd));
+//            else if(select == 2)
+//                bseeds.insert(std::make_pair(ypointEnd, xpointEnd));
+//            else if(select == 3)
+//                bseeds.insert(std::make_pair(ypointEnd, xpointEnd));
+//            else if(select == 4)
+//                bseeds.insert(std::make_pair(ypointEnd, xpointEnd));
+//            else if(select == 5)
+//                bseeds.insert(std::make_pair(ypointEnd, xpointEnd));
+
         }
 }
 
@@ -215,11 +274,36 @@ void MainWindow::on_ground_currentIndexChanged(int index)
 
 void MainWindow::on_uiFgrNum_currentIndexChanged(int index)
 {
+    ui->ground->clear();
+    ui->ground->addItem(QString("Background"));
+    ui->ground->addItem(QString("Foreground"));
     for(int i = 0; i < index; i++)
     {
-        QToolButton *btn = new QToolButton();
-        btn->setText(QString("%1").arg(i));
-        ui->colorContainer->addWidget(btn);
+//        QToolButton *btn = new QToolButton();
+//        btn->setText(QString("%1").arg(i));
+//        ui->colorContainer->addWidget(btn);
         ui->ground->addItem(QString("Foreground-%1").arg(i+2));
+    }
+}
+
+void MainWindow::on_uiMaxWidth_editingFinished()
+{
+    QString maxvalue = ui->uiMaxWidth->text();
+    bool check;
+    maxvalue.toUShort(&check);
+    if(!check)
+    {
+        QMessageBox::information(this, "Port Value","Enter Valid Range Vaule");
+    }
+}
+
+void MainWindow::on_uiMaxHeight_editingFinished()
+{
+    QString maxvalue = ui->uiMaxHeight->text();
+    bool check;
+    maxvalue.toUShort(&check);
+    if(!check)
+    {
+        QMessageBox::information(this, "Port Value","Enter Valid Range Vaule");
     }
 }

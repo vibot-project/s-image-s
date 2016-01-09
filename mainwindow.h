@@ -40,6 +40,10 @@ private slots:
 
     void on_uiFgrNum_currentIndexChanged(int index);
 
+    void on_uiMaxWidth_editingFinished();
+
+    void on_uiMaxHeight_editingFinished();
+
 private:
     LabelDraw                           *imageLabel;
     Ui::MainWindow                      *ui;
