@@ -19,6 +19,8 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->ground->addItem(QString("Foreground"));
     connect(imageLabel, SIGNAL(mousePressed()), this, SLOT(mousePressed()));
     connect(imageLabel, SIGNAL(mouseMoved()), this, SLOT(mouseMoved()));
+    connect(ui->actionOpen, SIGNAL(triggered(bool)), this, SLOT(on_Button_open_clicked()));
+    connect(ui->actionSave, SIGNAL(triggered(bool)), this, SLOT(on_saveButton_clicked()));
     ui->scrollArea->setBackgroundRole(QPalette::Dark);
     ui->scrollArea->setHorizontalScrollBarPolicy(Qt::ScrollBarAsNeeded);
     ui->scrollArea->setVerticalScrollBarPolicy(Qt::ScrollBarAsNeeded);
@@ -139,6 +141,7 @@ void MainWindow::on_algstart_clicked()
     }
     ui->algstart->setEnabled(false);
     ui->process->setEnabled(false);
+    ui->saveButton->setEnabled(false);
     worker = new WorkerThread(cvimage, fseeds, bseeds, 0.1, 0.0001, 3.0, 1.0);
     worker->moveToThread(thread);
     connect(worker, SIGNAL(progressEvent(int,QString)), this, SLOT(progressUpdate(int,QString)));
@@ -164,6 +167,8 @@ void MainWindow::progressUpdate(int value, QString text)
     if (value==progressBar->maximum()) {
         progressBar->setVisible(false);
         ui->process->setEnabled(true);
+        ui->saveButton->setEnabled(true);
+        ui->actionSave->setEnabled(true);
     }
 }
 
@@ -173,12 +178,15 @@ void MainWindow::on_process_clicked()
     if(buttonpro==true)
     {
         ui->Button_open->setEnabled(false);
+        ui->actionOpen->setEnabled(false);
         ui->uiMaxHeight->setEnabled(false);
         ui->uiMaxWidth->setEnabled(false);
         ui->horizontalSlider->setEnabled(false);
         ui->ground->setEnabled(true);
         ui->process->setText("Reset");
         ui->algstart->setEnabled(true);
+        ui->saveButton->setEnabled(true);
+        ui->actionSave->setEnabled(true);
         ui->horizontalSlider->setValue(5);
         select = ui->ground->currentIndex();
         qDebug() << "select on process:" << select;
@@ -190,6 +198,7 @@ void MainWindow::on_process_clicked()
         fseeds.clear();
         bseeds.clear();
         ui->Button_open->setEnabled(true);
+        ui->actionOpen->setEnabled(true);
         ui->uiMaxHeight->setEnabled(true);
         ui->uiMaxWidth->setEnabled(true);
         ui->process->setEnabled(true);
@@ -197,6 +206,7 @@ void MainWindow::on_process_clicked()
         ui->algstart->setEnabled(false);
         ui->ground->setEnabled(false);
         ui->saveButton->setEnabled(false);
+        ui->actionSave->setEnabled(false);
         ui->process->setText("Process");
         timage = rimage;
         imageLabel->setPixmap(QPixmap::fromImage(timage));
@@ -324,4 +334,29 @@ void MainWindow::on_uiMaxHeight_editingFinished()
     {
         QMessageBox::information(this, "Port Value","Enter Valid Range Vaule");
     }
+}
+
+/**
+ * @brief MainWindow::on_saveButton_clicked
+ * @cite: http://creative-punch.net/2014/02/opening-displaying-saving-images-qt
+ */
+
+void MainWindow::on_saveButton_clicked()
+{
+    QImage image = imageLabel->pixmap()->toImage();
+    if(!image.isNull()){
+        QString imagePath = QFileDialog::getSaveFileName(
+                        this,
+                        tr("Save File"),
+                        "",
+                        tr("JPEG (*.jpg *.jpeg);;PNG (*.png)" )
+                        );
+
+        image.save(imagePath);
+    }
+}
+
+void MainWindow::on_actionQuit_triggered()
+{
+    QApplication::exit(0);
 }

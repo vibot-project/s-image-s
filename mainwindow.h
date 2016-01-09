@@ -44,6 +44,10 @@ private slots:
 
     void on_uiMaxHeight_editingFinished();
 
+    void on_saveButton_clicked();
+
+    void on_actionQuit_triggered();
+
 private:
     LabelDraw                           *imageLabel;
     Ui::MainWindow                      *ui;
