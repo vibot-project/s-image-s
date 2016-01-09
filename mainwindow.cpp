@@ -125,6 +125,9 @@ bool MainWindow::loadImg(const QString &fileName)
         return false;
     }
 
+    buttonpro = true;
+    on_process_clicked();
+
     // Initialize the cv Image for the segmentation.
     cvimage = cv::imread(fileName.toStdString());
 
@@ -179,6 +182,7 @@ void MainWindow::on_horizontalSlider_valueChanged(int value)
     ui->scrollArea->horizontalScrollBar()->setValue(int(factor * ui->scrollArea->horizontalScrollBar()->value() + ((factor - 1) * ui->scrollArea->horizontalScrollBar()->pageStep()/2)));
     ui->scrollArea->verticalScrollBar()->setValue(int(factor * ui->scrollArea->verticalScrollBar()->value() + ((factor - 1) * ui->scrollArea->verticalScrollBar()->pageStep()/2)));
 }
+
 // Creating a toggle button with the pushbutton for enabling and disabling.
 void MainWindow::on_process_clicked()
 {
@@ -287,10 +291,10 @@ void MainWindow::mouseMoved()
             ypointStart = ypointEnd;
             imageLabel->setPixmap(QPixmap::fromImage(timage));
             // Reading the value to the seeds.
-            if(select == 1)
-                fseeds.insert(std::make_pair(ypointEnd, xpointEnd));
-            else if(select == 0)
+            if(select == 0)
                 bseeds.insert(std::make_pair(ypointEnd, xpointEnd));
+            else if(select == 1)
+                fseeds.insert(std::make_pair(ypointEnd, xpointEnd));
 //            else if(select == 2)
 //                bseeds.insert(std::make_pair(ypointEnd, xpointEnd));
 //            else if(select == 3)
@@ -349,6 +353,8 @@ void MainWindow::on_algstart_clicked()
     connect(worker, SIGNAL(finished(QImage, QString)), thread, SLOT(quit()));
     connect(worker, SIGNAL(finished(QImage, QString)), worker, SLOT(deleteLater()));
     thread->start();
+    fseeds.clear();
+    bseeds.clear();
 }
 
 //@brief MainWindow::on_saveButton_clicked
@@ -391,6 +397,8 @@ void MainWindow::progressUpdate(int value, QString text)
         ui->saveButton->setEnabled(true);
         ui->actionSave->setEnabled(true);
         ui->horizontalSlider->setEnabled(true);
+        ui->Button_open->setEnabled(true);
+        ui->actionOpen->setEnabled(true);
     }
 }
 
