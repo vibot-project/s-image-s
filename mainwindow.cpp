@@ -42,16 +42,14 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->ground->setEnabled(false);
     ui->horizontalSlider->setEnabled(false);
     ui->saveButton->setEnabled(false);
-
     // Create the Thread for the algorithm process.
+    ui->actionSave->setEnabled(false);
     thread = new QThread();
+    worker = NULL;
 }
 
 MainWindow::~MainWindow()
 {
-    // Deleting or freeing the Memory.
-    delete imageLabel;
-  //  delete worker;
     delete thread;
     delete ui;
 }
