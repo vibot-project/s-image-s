@@ -55,52 +55,62 @@ void MainWindow::on_Button_open_clicked()
     }
     else
     {
-    QStringList mimeTypeFilters;
-    foreach (const QByteArray &mimeTypeName, QImageReader::supportedMimeTypes())
-        mimeTypeFilters.append(mimeTypeName);
-    mimeTypeFilters.sort();
-    const QStringList picturesLocations = QStandardPaths::standardLocations(QStandardPaths::PicturesLocation);
-    QFileDialog dialog(this, tr("Open File"), picturesLocations.isEmpty() ? QDir::currentPath() : picturesLocations.first());
-    dialog.setAcceptMode(QFileDialog::AcceptOpen);
-    dialog.setMimeTypeFilters(mimeTypeFilters);
-    dialog.selectMimeTypeFilter("image/jpeg");
-    while (dialog.exec() == QDialog::Accepted && !loadImg(dialog.selectedFiles().first())) {}
+        QStringList mimeTypeFilters;
+        foreach (const QByteArray &mimeTypeName, QImageReader::supportedMimeTypes())
+            mimeTypeFilters.append(mimeTypeName);
+        mimeTypeFilters.sort();
+        const QStringList picturesLocations = QStandardPaths::standardLocations(QStandardPaths::PicturesLocation);
+        QFileDialog dialog(this, tr("Open File"), picturesLocations.isEmpty() ? QDir::currentPath() : picturesLocations.first());
+        dialog.setAcceptMode(QFileDialog::AcceptOpen);
+        dialog.setMimeTypeFilters(mimeTypeFilters);
+        dialog.selectMimeTypeFilter("image/jpeg");
+        while (dialog.exec() == QDialog::Accepted && !loadImg(dialog.selectedFiles().first())) {}
     }
 }
 
 bool MainWindow::loadImg(const QString &fileName)
 {
     QImage image(fileName);
-    QString maxheight = ui->uiMaxHeight->text();
-    QString maxwidth = ui->uiMaxWidth->text();
-    int height = maxheight.toInt();
-    int width = maxwidth.toInt();
-    if(image.height()<=height&&image.width()<=width)
-    {
-        if (image.isNull()) {
-            QMessageBox::information(this, QGuiApplication::applicationDisplayName(),
-                                     tr("Cannot load %1.").arg(QDir::toNativeSeparators(fileName)));
-            setWindowFilePath(QString());
-            imageLabel->setPixmap(QPixmap());
-            ui->Button_open->setEnabled(true);
-            return false;
-        }
-        cvimage = cv::imread(fileName.toStdString());
-        cvimage.convertTo(cvimage, CV_32F);
-        timage = image;
-        rimage = image;
+    int height = ui->uiMaxHeight->text().toInt();
+    int width = ui->uiMaxWidth->text().toInt();
+    if (image.isNull()) {
+        QMessageBox::information(this, QGuiApplication::applicationDisplayName(),
+                                 tr("Cannot load %1.").arg(QDir::toNativeSeparators(fileName)));
+        setWindowFilePath(QString());
+        imageLabel->setPixmap(QPixmap());
         ui->Button_open->setEnabled(true);
-        ui->process->setEnabled(true);
-        ui->horizontalSlider->setEnabled(true);
-        // set the image in the label
-        imageLabel->setPixmap(QPixmap::fromImage(timage));
-        imageLabel->adjustSize();
-        setWindowFilePath(fileName);
-        ui->statusBar->showMessage(QString("Image size: %1x%2").arg(cvimage.cols).arg(cvimage.rows));
-        return true;
+        return false;
     }
-    QMessageBox::information(this, "Port Value","Enter with in Range");
-    return false;
+    cvimage = cv::imread(fileName.toStdString());
+    int nwidth, nheight;
+    bool changed = false;
+    if(image.width() > width){
+        image = image.scaledToWidth(width);
+        nwidth = image.width();
+        nheight = image.height();
+        changed = true;
+    }
+    if(image.height() > height){
+        image = image.scaledToHeight(height);
+        nwidth = image.width();
+        nheight = image.height();
+        changed = true;
+    }
+    if(changed)
+        cv::resize(cvimage, cvimage, cv::Size(nwidth, nheight));
+    qDebug() << cvimage.cols << cvimage.rows;
+    cvimage.convertTo(cvimage, CV_32F);
+    timage = image;
+    rimage = image;
+    ui->Button_open->setEnabled(true);
+    ui->process->setEnabled(true);
+    ui->horizontalSlider->setEnabled(true);
+    // set the image in the label
+    imageLabel->setPixmap(QPixmap::fromImage(timage));
+    imageLabel->adjustSize();
+    setWindowFilePath(fileName);
+    ui->statusBar->showMessage(QString("Image size: %1x%2").arg(cvimage.cols).arg(cvimage.rows));
+    return true;
 }
 
 void MainWindow::on_horizontalSlider_valueChanged(int value)
