@@ -49,13 +49,16 @@ SOURCES += main.cpp\
     workerthread.cpp \
     algorithm.cpp \
     workingcontext.cpp \
-    labeldraw.cpp
+    labeldraw.cpp \
+    help.cpp
 
 HEADERS  += mainwindow.h \
     workingcontext.h \
     workerthread.h \
     algorithm.h \
     init.h \
-    labeldraw.h
+    labeldraw.h \
+    help.h
 
-FORMS    += mainwindow.ui
+FORMS    += mainwindow.ui \
+    help.ui
