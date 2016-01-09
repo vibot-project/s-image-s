@@ -125,6 +125,9 @@ bool MainWindow::loadImg(const QString &fileName)
         return false;
     }
 
+    buttonpro = true;
+    on_process_clicked();
+
     // Initialize the cv Image for the segmentation.
     cvimage = cv::imread(fileName.toStdString());
 
@@ -178,52 +181,6 @@ void MainWindow::on_horizontalSlider_valueChanged(int value)
     // Setting the horizontal and vertical scrollbar factor ratio.
     ui->scrollArea->horizontalScrollBar()->setValue(int(factor * ui->scrollArea->horizontalScrollBar()->value() + ((factor - 1) * ui->scrollArea->horizontalScrollBar()->pageStep()/2)));
     ui->scrollArea->verticalScrollBar()->setValue(int(factor * ui->scrollArea->verticalScrollBar()->value() + ((factor - 1) * ui->scrollArea->verticalScrollBar()->pageStep()/2)));
-}
-
-void MainWindow::on_algstart_clicked()
-{
-    if(bseeds.empty()){
-        QMessageBox::warning(this, "Seeds not selected!", "Please select background seeds.");
-        return;
-    }
-    if(fseeds.empty()){
-        QMessageBox::warning(this, "Seeds not selected!", "Please select foreground seeds.");
-        return;
-    }
-    ui->algstart->setEnabled(false);
-    ui->process->setEnabled(false);
-    ui->saveButton->setEnabled(false);
-    worker = new WorkerThread(cvimage, fseeds, bseeds, 0.1, 0.0001, 3.0, 1.0);
-    worker->moveToThread(thread);
-    connect(worker, SIGNAL(progressEvent(int,QString)), this, SLOT(progressUpdate(int,QString)));
-    connect(worker, SIGNAL(error(QString)), this, SLOT(errorHandler(QString)));
-    connect(thread, SIGNAL(started()), worker, SLOT(process()));
-    connect(worker, SIGNAL(finished(QImage, QString)), this, SLOT(showImage(QImage, QString)));
-    connect(worker, SIGNAL(finished(QImage, QString)), thread, SLOT(quit()));
-    connect(worker, SIGNAL(finished(QImage, QString)), worker, SLOT(deleteLater()));
-    thread->start();
-}
-
-void MainWindow::showImage(const QImage &pimage, const QString &message)
-{
-    imageLabel->setPixmap(QPixmap::fromImage(pimage));
-    ui->statusBar->showMessage(message);
-}
-
-void MainWindow::progressUpdate(int value, QString text)
-{
-    progressBar->setFormat(QString("%1: %p%").arg(text));
-    progressBar->setVisible(true);
-    progressBar->setValue(value);
-    if (value==progressBar->maximum()) {
-        progressBar->setVisible(false);
-        ui->process->setEnabled(true);
-        ui->saveButton->setEnabled(true);
-        ui->actionSave->setEnabled(true);
-        ui->horizontalSlider->setEnabled(true);
-        ui->actionOpen->setEnabled(true);
-        ui->Button_open->setEnabled(true);
-    }
 }
 
 // Creating a toggle button with the pushbutton for enabling and disabling.
@@ -334,7 +291,7 @@ void MainWindow::mouseMoved()
             ypointStart = ypointEnd;
             imageLabel->setPixmap(QPixmap::fromImage(timage));
             // Reading the value to the seeds.
-            else if(select == 0)
+            if(select == 0)
                 bseeds.insert(std::make_pair(ypointEnd, xpointEnd));
             else if(select == 1)
                 fseeds.insert(std::make_pair(ypointEnd, xpointEnd));
@@ -396,6 +353,8 @@ void MainWindow::on_algstart_clicked()
     connect(worker, SIGNAL(finished(QImage, QString)), thread, SLOT(quit()));
     connect(worker, SIGNAL(finished(QImage, QString)), worker, SLOT(deleteLater()));
     thread->start();
+    fseeds.clear();
+    bseeds.clear();
 }
 
 //@brief MainWindow::on_saveButton_clicked
@@ -438,6 +397,8 @@ void MainWindow::progressUpdate(int value, QString text)
         ui->saveButton->setEnabled(true);
         ui->actionSave->setEnabled(true);
         ui->horizontalSlider->setEnabled(true);
+        ui->Button_open->setEnabled(true);
+        ui->actionOpen->setEnabled(true);
     }
 }
 
