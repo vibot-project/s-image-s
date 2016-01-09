@@ -31,12 +31,14 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->ground->setEnabled(false);
     ui->horizontalSlider->setEnabled(false);
     ui->saveButton->setEnabled(false);
+    thread = new QThread();
 }
 
 MainWindow::~MainWindow()
 {
-//    delete imageLabel;
-//    delete context;
+    delete imageLabel;
+    delete worker;
+    delete thread;
     delete ui;
 }
 
@@ -75,32 +77,30 @@ bool MainWindow::loadImg(const QString &fileName)
     int width = maxwidth.toInt();
     if(image.height()<=height&&image.width()<=width)
     {
-    if (image.isNull()) {
-        QMessageBox::information(this, QGuiApplication::applicationDisplayName(),
-                                 tr("Cannot load %1.").arg(QDir::toNativeSeparators(fileName)));
-        setWindowFilePath(QString());
-        imageLabel->setPixmap(QPixmap());
+        if (image.isNull()) {
+            QMessageBox::information(this, QGuiApplication::applicationDisplayName(),
+                                     tr("Cannot load %1.").arg(QDir::toNativeSeparators(fileName)));
+            setWindowFilePath(QString());
+            imageLabel->setPixmap(QPixmap());
+            ui->Button_open->setEnabled(true);
+            return false;
+        }
+        cvimage = cv::imread(fileName.toStdString());
+        cvimage.convertTo(cvimage, CV_32F);
+        timage = image;
+        rimage = image;
         ui->Button_open->setEnabled(true);
-        return false;
+        ui->process->setEnabled(true);
+        ui->horizontalSlider->setEnabled(true);
+        // set the image in the label
+        imageLabel->setPixmap(QPixmap::fromImage(timage));
+        imageLabel->adjustSize();
+        setWindowFilePath(fileName);
+        ui->statusBar->showMessage(QString("Image size: %1x%2").arg(cvimage.cols).arg(cvimage.rows));
+        return true;
     }
-    cvimage = cv::imread(fileName.toStdString());
-    cvimage.convertTo(cvimage, CV_32F);
-    timage = image;
-    rimage = image;
-    ui->Button_open->setEnabled(true);
-    ui->process->setEnabled(true);
-    ui->horizontalSlider->setEnabled(true);
-    // set the image in the label
-    imageLabel->setPixmap(QPixmap::fromImage(timage));
-    imageLabel->adjustSize();
-    setWindowFilePath(fileName);
-    ui->statusBar->showMessage(QString("Image size: %1x%2").arg(cvimage.cols).arg(cvimage.rows));
-    return true;
-    }
-    else
-    {
-        QMessageBox::information(this, "Port Value","Enter with in Range");
-    }
+    QMessageBox::information(this, "Port Value","Enter with in Range");
+    return false;
 }
 
 void MainWindow::on_horizontalSlider_valueChanged(int value)
@@ -119,8 +119,16 @@ void MainWindow::on_horizontalSlider_valueChanged(int value)
 
 void MainWindow::on_algstart_clicked()
 {
+    if(bseeds.empty()){
+        QMessageBox::warning(this, "Seeds not selected!", "Please select background seeds.");
+        return;
+    }
+    if(fseeds.empty()){
+        QMessageBox::warning(this, "Seeds not selected!", "Please select foreground seeds.");
+        return;
+    }
     ui->algstart->setEnabled(false);
-    thread = new QThread();
+    ui->process->setEnabled(false);
     worker = new WorkerThread(cvimage, fseeds, bseeds, 0.1, 0.0001, 3.0, 1.0);
     worker->moveToThread(thread);
     connect(worker, SIGNAL(progressEvent(int,QString)), this, SLOT(progressUpdate(int,QString)));
@@ -129,7 +137,6 @@ void MainWindow::on_algstart_clicked()
     connect(worker, SIGNAL(finished(QImage, QString)), this, SLOT(showImage(QImage, QString)));
     connect(worker, SIGNAL(finished(QImage, QString)), thread, SLOT(quit()));
     connect(worker, SIGNAL(finished(QImage, QString)), worker, SLOT(deleteLater()));
-    connect(thread, SIGNAL(finished()), thread, SLOT(deleteLater()));
     thread->start();
 }
 
@@ -146,6 +153,7 @@ void MainWindow::progressUpdate(int value, QString text)
     progressBar->setValue(value);
     if (value==progressBar->maximum()) {
         progressBar->setVisible(false);
+        ui->process->setEnabled(true);
     }
 }
 

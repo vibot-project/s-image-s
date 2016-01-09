@@ -49,9 +49,10 @@ QImage WorkerThread::convertMat(const cv::Mat &pimage)
 
 void WorkerThread::updateProgress(int value)
 {
-    emit progressEvent(value, QString("Process:"));
+    emit progressEvent(value, QString("Process"));
 }
 
 WorkerThread::~WorkerThread()
 {
+    delete context;
 }
