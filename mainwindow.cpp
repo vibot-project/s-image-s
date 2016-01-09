@@ -33,14 +33,19 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->ground->setEnabled(false);
     ui->horizontalSlider->setEnabled(false);
     ui->saveButton->setEnabled(false);
+    ui->actionSave->setEnabled(false);
     thread = new QThread();
+    worker = NULL;
 }
 
 MainWindow::~MainWindow()
 {
-    delete imageLabel;
-    delete worker;
-    delete thread;
+    if(imageLabel != NULL)
+        delete imageLabel;
+    if(worker != NULL)
+        delete worker;
+    if(thread != NULL)
+        delete thread;
     delete ui;
 }
 
