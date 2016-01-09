@@ -10,6 +10,7 @@
 #include "workerthread.h"
 #include "algorithm.h"
 #include "labeldraw.h"
+#include "help.h"
 
 namespace Ui {
 class MainWindow;
@@ -48,12 +49,17 @@ private slots:
 
     void on_actionQuit_triggered();
 
+    void on_actionAbout_triggered();
+
+    void on_actionHelp_triggered();
+
 private:
     LabelDraw                           *imageLabel;
     Ui::MainWindow                      *ui;
     WorkerThread                        *worker;
     QThread                             *thread;
     QProgressBar                        *progressBar;
+    Help                                ui_help;
     int                                 xpointStart, xpointEnd;
     int                                 ypointStart, ypointEnd;
     QImage                              timage;

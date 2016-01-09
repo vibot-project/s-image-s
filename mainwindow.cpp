@@ -169,6 +169,7 @@ void MainWindow::progressUpdate(int value, QString text)
         ui->process->setEnabled(true);
         ui->saveButton->setEnabled(true);
         ui->actionSave->setEnabled(true);
+        ui->horizontalSlider->setEnabled(true);
     }
 }
 
@@ -348,12 +349,26 @@ void MainWindow::on_saveButton_clicked()
                         "",
                         tr("JPEG (*.jpg *.jpeg);;PNG (*.png)" )
                         );
-
-        image.save(imagePath);
+        if(!imagePath.isEmpty())
+            image.save(imagePath);
     }
 }
 
 void MainWindow::on_actionQuit_triggered()
 {
     QApplication::exit(0);
+}
+
+void MainWindow::on_actionAbout_triggered()
+{
+    QMessageBox::information(this, "About", "This application is used to segment images using seed based method described in paper \"Laplacian Coordinates for Seeded Image Segmentation\" by Casaca, W. ; ICMC, Univ. of Sao Paulo, São Carlos, Brazil ; Nonato, L.G. ; Taubin, G.\n\nImplemented by Kushibar K., Peng S., Veilu Muthu V.");
+}
+
+/**
+ * @brief MainWindow::on_actionHelp_triggered
+ *
+ */
+void MainWindow::on_actionHelp_triggered()
+{
+    ui_help.show();
 }
