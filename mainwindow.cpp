@@ -49,7 +49,7 @@ void MainWindow::on_Button_open_clicked()
     maxwidth.toUShort(&check2);
     if(!(check1&check2))
     {
-        QMessageBox::information(this, "Port Value","Enter Valid Range Vaule");
+        QMessageBox::information(this, "Error message","Enter Valid Range Vaule");
     }
     else
     {
@@ -73,8 +73,6 @@ bool MainWindow::loadImg(const QString &fileName)
     QString maxwidth = ui->uiMaxWidth->text();
     int height = maxheight.toInt();
     int width = maxwidth.toInt();
-    if(image.height()<=height&&image.width()<=width)
-    {
     if (image.isNull()) {
         QMessageBox::information(this, QGuiApplication::applicationDisplayName(),
                                  tr("Cannot load %1.").arg(QDir::toNativeSeparators(fileName)));
@@ -84,9 +82,34 @@ bool MainWindow::loadImg(const QString &fileName)
         return false;
     }
     cvimage = cv::imread(fileName.toStdString());
-    cvimage.convertTo(cvimage, CV_32F);
+    if(image.height()<=height)
+    {
+        if(image.width()<=width)
+        {
+
+        }
+        else
+        {
+            image = image.scaledToWidth(width);
+        }
+    }
+    else
+    {
+        image = image.scaledToHeight(height);
+        qDebug()<<height/image.height();
+        cv::resize(cvimage, cvimage,cv::Size(width,height));
+        if(image.width()<=width)
+        {
+
+        }
+        else
+        {
+            image = image.scaledToWidth(width);
+        }
+    }
     timage = image;
     rimage = image;
+    cvimage.convertTo(cvimage, CV_32F);
     ui->Button_open->setEnabled(true);
     ui->process->setEnabled(true);
     ui->horizontalSlider->setEnabled(true);
@@ -96,11 +119,6 @@ bool MainWindow::loadImg(const QString &fileName)
     setWindowFilePath(fileName);
     ui->statusBar->showMessage(QString("Image size: %1x%2").arg(cvimage.cols).arg(cvimage.rows));
     return true;
-    }
-    else
-    {
-        QMessageBox::information(this, "Port Value","Enter with in Range");
-    }
 }
 
 void MainWindow::on_horizontalSlider_valueChanged(int value)
@@ -279,9 +297,6 @@ void MainWindow::on_uiFgrNum_currentIndexChanged(int index)
     ui->ground->addItem(QString("Foreground"));
     for(int i = 0; i < index; i++)
     {
-//        QToolButton *btn = new QToolButton();
-//        btn->setText(QString("%1").arg(i));
-//        ui->colorContainer->addWidget(btn);
         ui->ground->addItem(QString("Foreground-%1").arg(i+2));
     }
 }
