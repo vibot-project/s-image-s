@@ -8,6 +8,7 @@ WorkerThread::WorkerThread(const cv::Mat &image,
                            const double &Xb,
                            const double &Xf):image(image),fgSeeds(fgSeeds),bgSeeds(bgSeeds),sigma(sigma),beta(beta),Xb(Xb),Xf(Xf)
 {
+    context = NULL;
 }
 
 void WorkerThread::process()
@@ -55,4 +56,5 @@ void WorkerThread::updateProgress(int value)
 WorkerThread::~WorkerThread()
 {
     delete context;
+    qDebug() << "worker thread destroyed";
 }

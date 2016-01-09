@@ -41,8 +41,7 @@ cv::Mat WorkingContext::getSegmentation(){
 
 WorkingContext::~WorkingContext()
 {
-    fseeds.clear();
-    bseeds.clear();
+    qDebug() << "working context destroyed.";
 }
 
 void WorkingContext::declareSparse(int N, int M)

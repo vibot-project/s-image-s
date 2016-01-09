@@ -40,12 +40,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
 MainWindow::~MainWindow()
 {
-    if(imageLabel != NULL)
-        delete imageLabel;
-    if(worker != NULL)
-        delete worker;
-    if(thread != NULL)
-        delete thread;
+    delete thread;
     delete ui;
 }
 
@@ -175,6 +170,8 @@ void MainWindow::progressUpdate(int value, QString text)
         ui->saveButton->setEnabled(true);
         ui->actionSave->setEnabled(true);
         ui->horizontalSlider->setEnabled(true);
+        ui->actionOpen->setEnabled(true);
+        ui->Button_open->setEnabled(true);
     }
 }
 
@@ -278,10 +275,10 @@ void MainWindow::mouseMoved()
             xpointStart = xpointEnd;
             ypointStart = ypointEnd;
             imageLabel->setPixmap(QPixmap::fromImage(timage));
-            if(select == 1)
-                fseeds.insert(std::make_pair(ypointEnd, xpointEnd));
-            else if(select == 0)
+            if(select == 0)
                 bseeds.insert(std::make_pair(ypointEnd, xpointEnd));
+            else if(select == 1)
+                fseeds.insert(std::make_pair(ypointEnd, xpointEnd));
 //            else if(select == 2)
 //                bseeds.insert(std::make_pair(ypointEnd, xpointEnd));
 //            else if(select == 3)
