@@ -6,7 +6,13 @@ MainWindow::MainWindow(QWidget *parent) :
     ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
+    // Starting the Constructor of Mainwindow class.
+    // Initialize the mouse action parameters.
+    buttonpro = true;
+    select = 0;
+    paint = false;
 
+    // Creating the Label and progressbar for mainwindow.
     imageLabel = new LabelDraw;
     imageLabel->setBackgroundRole(QPalette::Dark);
     imageLabel->setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Ignored);
@@ -14,40 +20,74 @@ MainWindow::MainWindow(QWidget *parent) :
     progressBar = new QProgressBar;
     progressBar->setValue(0);
     progressBar->setVisible(false);
+
+    // Initializing the statusbar dropdown box and scrollarea part.
     ui->statusBar->addWidget(progressBar);
     ui->ground->addItem(QString("Background"));
     ui->ground->addItem(QString("Foreground"));
-    connect(imageLabel, SIGNAL(mousePressed()), this, SLOT(mousePressed()));
-    connect(imageLabel, SIGNAL(mouseMoved()), this, SLOT(mouseMoved()));
-    connect(ui->actionOpen, SIGNAL(triggered(bool)), this, SLOT(on_Button_open_clicked()));
-    connect(ui->actionSave, SIGNAL(triggered(bool)), this, SLOT(on_saveButton_clicked()));
     ui->scrollArea->setBackgroundRole(QPalette::Dark);
     ui->scrollArea->setHorizontalScrollBarPolicy(Qt::ScrollBarAsNeeded);
     ui->scrollArea->setVerticalScrollBarPolicy(Qt::ScrollBarAsNeeded);
     ui->scrollArea->setWidget(imageLabel);
-    buttonpro = true;
-    select = 0;
-    paint = false;
+
+    // Connecting the Mouse action and the action section.
+    connect(imageLabel, SIGNAL(mousePressed()), this, SLOT(mousePressed()));
+    connect(imageLabel, SIGNAL(mouseMoved()), this, SLOT(mouseMoved()));
+    connect(ui->actionOpen, SIGNAL(triggered(bool)), this, SLOT(on_Button_open_clicked()));
+    connect(ui->actionSave, SIGNAL(triggered(bool)), this, SLOT(on_saveButton_clicked()));
+
+    // Disable for the preset start.
     ui->process->setEnabled(false);
     ui->algstart->setEnabled(false);
     ui->ground->setEnabled(false);
     ui->horizontalSlider->setEnabled(false);
     ui->saveButton->setEnabled(false);
+
+    // Create the Thread for the algorithm process.
     thread = new QThread();
 }
 
 MainWindow::~MainWindow()
 {
+    // Deleting or freeing the Memory.
     delete imageLabel;
-    delete worker;
+  //  delete worker;
     delete thread;
     delete ui;
 }
 
+//%%%%%%%%%%%%%%%%% LOAD IMAGE SECTION %%%%%%%%%%%%
+// Check for the valid entry in the width text editor
+void MainWindow::on_uiMaxWidth_editingFinished()
+{
+    QString maxvalue = ui->uiMaxWidth->text();
+    bool check;
+    maxvalue.toUShort(&check);
+    if(!check)
+    {
+        QMessageBox::information(this, "Error message","Enter Valid Range Vaule");
+    }
+}
+// Check for the valid entry in the height text editor
+void MainWindow::on_uiMaxHeight_editingFinished()
+{
+    QString maxvalue = ui->uiMaxHeight->text();
+    bool check;
+    maxvalue.toUShort(&check);
+    if(!check)
+    {
+        QMessageBox::information(this, "Error message","Enter Valid Range Vaule");
+    }
+}
+
+// Pushbutton for loading the image
 void MainWindow::on_Button_open_clicked()
 {
+    // Grab the Height and Width for the text editor/
     QString maxheight = ui->uiMaxHeight->text();
     QString maxwidth = ui->uiMaxWidth->text();
+
+    // Check for the valid entry is numbers.
     bool check1,check2;
     maxheight.toUShort(&check1);
     maxwidth.toUShort(&check2);
@@ -57,6 +97,7 @@ void MainWindow::on_Button_open_clicked()
     }
     else
     {
+        // Open the Dialog box and select the required image for the processing.
         QStringList mimeTypeFilters;
         foreach (const QByteArray &mimeTypeName, QImageReader::supportedMimeTypes())
             mimeTypeFilters.append(mimeTypeName);
@@ -70,8 +111,10 @@ void MainWindow::on_Button_open_clicked()
     }
 }
 
+// Resize the Image Before displaying in the Label.
 bool MainWindow::loadImg(const QString &fileName)
 {
+    // Load QImage to display and check the image is valid.
     QImage image(fileName);
     int height = ui->uiMaxHeight->text().toInt();
     int width = ui->uiMaxWidth->text().toInt();
@@ -83,7 +126,11 @@ bool MainWindow::loadImg(const QString &fileName)
         ui->Button_open->setEnabled(true);
         return false;
     }
+
+    // Initialize the cv Image for the segmentation.
     cvimage = cv::imread(fileName.toStdString());
+
+    // Set the size limit for height and width.
     int nwidth, nheight;
     bool changed = false;
     if(image.width() > width){
@@ -98,12 +145,15 @@ bool MainWindow::loadImg(const QString &fileName)
         nheight = image.height();
         changed = true;
     }
+    // When there is a new image is loaded change the size of the image.
     if(changed)
         cv::resize(cvimage, cvimage, cv::Size(nwidth, nheight));
-    qDebug() << cvimage.cols << cvimage.rows;
+    // Convert the image formet for the process
     cvimage.convertTo(cvimage, CV_32F);
+    // Reserve the Image for reset.
     timage = image;
     rimage = image;
+    // Enable the buttons for the next porcess
     ui->Button_open->setEnabled(true);
     ui->process->setEnabled(true);
     ui->horizontalSlider->setEnabled(true);
@@ -111,10 +161,13 @@ bool MainWindow::loadImg(const QString &fileName)
     imageLabel->setPixmap(QPixmap::fromImage(timage));
     imageLabel->adjustSize();
     setWindowFilePath(fileName);
+    // Show the status of image size
     ui->statusBar->showMessage(QString("Image size: %1x%2").arg(cvimage.cols).arg(cvimage.rows));
     return true;
 }
 
+//%%%%%%%%%%%%% SELECTION SECTION %%%%%%%%%%%%%%%%%
+// setting the slider ratio property with the scale factor
 void MainWindow::on_horizontalSlider_valueChanged(int value)
 {
     if (!imageLabel->pixmap()) {
@@ -124,60 +177,16 @@ void MainWindow::on_horizontalSlider_valueChanged(int value)
     double factor;
     factor = value*0.2;
     imageLabel->resize(factor * imageLabel->pixmap()->size());
+    // Setting the horizontal and vertical scrollbar factor ratio.
     ui->scrollArea->horizontalScrollBar()->setValue(int(factor * ui->scrollArea->horizontalScrollBar()->value() + ((factor - 1) * ui->scrollArea->horizontalScrollBar()->pageStep()/2)));
     ui->scrollArea->verticalScrollBar()->setValue(int(factor * ui->scrollArea->verticalScrollBar()->value() + ((factor - 1) * ui->scrollArea->verticalScrollBar()->pageStep()/2)));
 }
-
-
-void MainWindow::on_algstart_clicked()
-{
-    if(bseeds.empty()){
-        QMessageBox::warning(this, "Seeds not selected!", "Please select background seeds.");
-        return;
-    }
-    if(fseeds.empty()){
-        QMessageBox::warning(this, "Seeds not selected!", "Please select foreground seeds.");
-        return;
-    }
-    ui->algstart->setEnabled(false);
-    ui->process->setEnabled(false);
-    ui->saveButton->setEnabled(false);
-    worker = new WorkerThread(cvimage, fseeds, bseeds, 0.1, 0.0001, 3.0, 1.0);
-    worker->moveToThread(thread);
-    connect(worker, SIGNAL(progressEvent(int,QString)), this, SLOT(progressUpdate(int,QString)));
-    connect(worker, SIGNAL(error(QString)), this, SLOT(errorHandler(QString)));
-    connect(thread, SIGNAL(started()), worker, SLOT(process()));
-    connect(worker, SIGNAL(finished(QImage, QString)), this, SLOT(showImage(QImage, QString)));
-    connect(worker, SIGNAL(finished(QImage, QString)), thread, SLOT(quit()));
-    connect(worker, SIGNAL(finished(QImage, QString)), worker, SLOT(deleteLater()));
-    thread->start();
-}
-
-void MainWindow::showImage(const QImage &pimage, const QString &message)
-{
-    imageLabel->setPixmap(QPixmap::fromImage(pimage));
-    ui->statusBar->showMessage(message);
-}
-
-void MainWindow::progressUpdate(int value, QString text)
-{
-    progressBar->setFormat(QString("%1: %p%").arg(text));
-    progressBar->setVisible(true);
-    progressBar->setValue(value);
-    if (value==progressBar->maximum()) {
-        progressBar->setVisible(false);
-        ui->process->setEnabled(true);
-        ui->saveButton->setEnabled(true);
-        ui->actionSave->setEnabled(true);
-        ui->horizontalSlider->setEnabled(true);
-    }
-}
-
-
+// Creating a toggle button with the pushbutton for enabling and disabling.
 void MainWindow::on_process_clicked()
 {
     if(buttonpro==true)
     {
+        // When the process button is clicked
         ui->Button_open->setEnabled(false);
         ui->actionOpen->setEnabled(false);
         ui->uiMaxHeight->setEnabled(false);
@@ -196,6 +205,7 @@ void MainWindow::on_process_clicked()
     }
     else
     {
+        // When the Reset button is clicked.
         fseeds.clear();
         bseeds.clear();
         ui->Button_open->setEnabled(true);
@@ -216,11 +226,14 @@ void MainWindow::on_process_clicked()
     }
 }
 
+// Selecting the mouse action for reading the mouse position
 void MainWindow::mousePressed()
 {
+    //Read x & y coordinated from the screen.
     xpointStart = imageLabel->getX();
     ypointStart = imageLabel->getY();
     if((xpointStart>0)&&(xpointStart<imageLabel->geometry().width())&&(ypointStart>0)&&(ypointStart<imageLabel->geometry().height()))
+        // Making a point of selection between the seeds.
         if(paint == true)
         {
             if(select==1)
@@ -230,6 +243,7 @@ void MainWindow::mousePressed()
         }
 }
 
+// Defining various color for each seeds.
 void MainWindow::mouseMoved()
 {
     xpointEnd = imageLabel->getX();
@@ -268,11 +282,13 @@ void MainWindow::mouseMoved()
                 paintpen.setColor(Qt::white);
                 paintpen.setWidth(4);
             }
+            // Reading the point from the mouse and label the point color on the displayed image.
             painter.setPen(paintpen);
             painter.drawLine(xpointStart, ypointStart, xpointEnd, ypointEnd);
             xpointStart = xpointEnd;
             ypointStart = ypointEnd;
             imageLabel->setPixmap(QPixmap::fromImage(timage));
+            // Reading the value to the seeds.
             if(select == 1)
                 fseeds.insert(std::make_pair(ypointEnd, xpointEnd));
             else if(select == 0)
@@ -289,18 +305,14 @@ void MainWindow::mouseMoved()
         }
 }
 
-void MainWindow::errorHandler(QString err)
-{
-    ui->statusBar->showMessage(err);
-}
-
-
+// Selecting the index for the different ground layer.
 void MainWindow::on_ground_currentIndexChanged(int index)
 {
     select = index;
     qDebug() << "selected index:" << select;
 }
 
+// creating the select layer for the ground layer.
 void MainWindow::on_uiFgrNum_currentIndexChanged(int index)
 {
     ui->ground->clear();
@@ -312,62 +324,91 @@ void MainWindow::on_uiFgrNum_currentIndexChanged(int index)
     }
 }
 
-void MainWindow::on_uiMaxWidth_editingFinished()
+//%%%%%%%%%%%%%% PROCESS SECTION %%%%%%%%%%%%%%%%%%%%
+// Starting the algorithm process
+void MainWindow::on_algstart_clicked()
 {
-    QString maxvalue = ui->uiMaxWidth->text();
-    bool check;
-    maxvalue.toUShort(&check);
-    if(!check)
-    {
-        QMessageBox::information(this, "Port Value","Enter Valid Range Vaule");
+    if(bseeds.empty()){
+        QMessageBox::warning(this, "Seeds not selected!", "Please select background seeds.");
+        return;
     }
+    if(fseeds.empty()){
+        QMessageBox::warning(this, "Seeds not selected!", "Please select foreground seeds.");
+        return;
+    }
+    // Disabling other setting when the algorithm is in run.
+    ui->algstart->setEnabled(false);
+    ui->process->setEnabled(false);
+    ui->saveButton->setEnabled(false);
+    // Creating the worker thread for process.
+    worker = new WorkerThread(cvimage, fseeds, bseeds, 0.1, 0.0001, 3.0, 1.0);
+    worker->moveToThread(thread);
+    // connecting the signal with the process thread.
+    connect(worker, SIGNAL(progressEvent(int,QString)), this, SLOT(progressUpdate(int,QString)));
+    connect(worker, SIGNAL(error(QString)), this, SLOT(errorHandler(QString)));
+    connect(thread, SIGNAL(started()), worker, SLOT(process()));
+    connect(worker, SIGNAL(finished(QImage, QString)), this, SLOT(showImage(QImage, QString)));
+    connect(worker, SIGNAL(finished(QImage, QString)), thread, SLOT(quit()));
+    connect(worker, SIGNAL(finished(QImage, QString)), worker, SLOT(deleteLater()));
+    thread->start();
 }
 
-void MainWindow::on_uiMaxHeight_editingFinished()
-{
-    QString maxvalue = ui->uiMaxHeight->text();
-    bool check;
-    maxvalue.toUShort(&check);
-    if(!check)
-    {
-        QMessageBox::information(this, "Port Value","Enter Valid Range Vaule");
-    }
-}
+//@brief MainWindow::on_saveButton_clicked
+//@cite: http://creative-punch.net/2014/02/opening-displaying-saving-images-qt
 
-/**
- * @brief MainWindow::on_saveButton_clicked
- * @cite: http://creative-punch.net/2014/02/opening-displaying-saving-images-qt
- */
-
+// Saving the label image to the directary.
 void MainWindow::on_saveButton_clicked()
 {
     QImage image = imageLabel->pixmap()->toImage();
     if(!image.isNull()){
-        QString imagePath = QFileDialog::getSaveFileName(
-                        this,
-                        tr("Save File"),
-                        "",
-                        tr("JPEG (*.jpg *.jpeg);;PNG (*.png)" )
-                        );
+        QString imagePath = QFileDialog::getSaveFileName(this,tr("Save File"),"",tr("JPEG (*.jpg *.jpeg);;PNG (*.png)" ));
         if(!imagePath.isEmpty())
             image.save(imagePath);
     }
 }
 
+// Trigger Quit button
 void MainWindow::on_actionQuit_triggered()
 {
     QApplication::exit(0);
 }
 
+//%%%%%%%%%%% DISPLAY SECTION %%%%%%%%%%%%%%%%
+// Displaying the processed image in the Label
+void MainWindow::showImage(const QImage &pimage, const QString &message)
+{
+    imageLabel->setPixmap(QPixmap::fromImage(pimage));
+    ui->statusBar->showMessage(message);
+}
+
+// Setting the process update information in progressbar
+void MainWindow::progressUpdate(int value, QString text)
+{
+    progressBar->setFormat(QString("%1: %p%").arg(text));
+    progressBar->setVisible(true);
+    progressBar->setValue(value);
+    if (value==progressBar->maximum()) {
+        progressBar->setVisible(false);
+        ui->process->setEnabled(true);
+        ui->saveButton->setEnabled(true);
+        ui->actionSave->setEnabled(true);
+        ui->horizontalSlider->setEnabled(true);
+    }
+}
+
+// Displaying the error message
+void MainWindow::errorHandler(QString err)
+{
+    ui->statusBar->showMessage(err);
+}
+
+// Displaying the information about the appliaction
 void MainWindow::on_actionAbout_triggered()
 {
     QMessageBox::information(this, "About", "This application is used to segment images using seed based method described in paper \"Laplacian Coordinates for Seeded Image Segmentation\" by Casaca, W. ; ICMC, Univ. of Sao Paulo, São Carlos, Brazil ; Nonato, L.G. ; Taubin, G.\n\nImplemented by Kushibar K., Peng S., Veilu Muthu V.");
 }
 
-/**
- * @brief MainWindow::on_actionHelp_triggered
- *
- */
+// Displaying the help about the software setting
 void MainWindow::on_actionHelp_triggered()
 {
     ui_help.show();
