@@ -15,7 +15,7 @@
 #define INIT
 
 #include <opencv2/opencv.hpp>
-#include <eigen3/Eigen/Sparse>
+#include <Eigen/Sparse>
 
 #include <iostream>
 #include <cstring>
