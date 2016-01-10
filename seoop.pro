@@ -44,21 +44,25 @@ INCLUDEPATH += C:\eigen
 
 CONFIG += c++11
 
-SOURCES += main.cpp\
-        mainwindow.cpp \
-    workerthread.cpp \
-    algorithm.cpp \
-    workingcontext.cpp \
-    labeldraw.cpp \
-    help.cpp
+SOURCES += src/apps/main.cpp\
+        src/gui/mainwindow.cpp \
+    src/common/workerthread.cpp \
+    src/common/algorithm.cpp \
+    src/common/workingcontext.cpp \
+    src/gui/labeldraw.cpp \
+    src/gui/help.cpp
 
-HEADERS  += mainwindow.h \
-    workingcontext.h \
-    workerthread.h \
-    algorithm.h \
-    init.h \
-    labeldraw.h \
-    help.h
+HEADERS  += src/gui/mainwindow.h \
+    src/common/workingcontext.h \
+    src/common/workerthread.h \
+    src/common/algorithm.h \
+    src/common/init.h \
+    src/gui/labeldraw.h \
+    src/gui/help.h
 
-FORMS    += mainwindow.ui \
-    help.ui
+FORMS    += src/gui/mainwindow.ui \
+    src/gui/help.ui
+
+INCLUDEPATH += src/gui \
+               src/common \
+               src/apps
