@@ -5,7 +5,7 @@
 #define WORKERTHREAD_H
 
 #include "init.h"
-#include "workingcontext.h"
+#include "algorithm.h"
 #include <time.h>
 #include <QImage>
 
@@ -28,7 +28,7 @@ signals:
     void error(QString err);
     void progressEvent(int, QString);
 private:
-    WorkingContext *context;
+    Algorithm *context;
     cv::Mat resultImage;
     const cv::Mat image;
     const std::set<std::pair<int,int> > fgSeeds;

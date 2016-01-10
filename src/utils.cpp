@@ -1,10 +1,10 @@
-#include "algorithm.h"
+#include "utils.h"
 
-Algorithm::Algorithm()
+Utils::Utils()
 {
 }
 
-Eigen::VectorXd Algorithm::solver(const Eigen::SparseMatrix <double> &A, const Eigen::VectorXd &b)
+Eigen::VectorXd Utils::solver(const Eigen::SparseMatrix <double> &A, const Eigen::VectorXd &b)
 {
     static Eigen::SimplicialLDLT<Eigen::SparseMatrix<double> > simplicialSolver;
     qDebug() << "Starting to solve Ax = b";

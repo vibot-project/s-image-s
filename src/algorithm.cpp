@@ -1,10 +1,10 @@
-#include "workingcontext.h"
+#include "algorithm.h"
 
-const int WorkingContext::dx[] = {1, 0, -1, 0};
-const int WorkingContext::dy[] = {0, 1, 0, -1};
-const double WorkingContext::eps = 0.000001;
+const int Algorithm::dx[] = {1, 0, -1, 0};
+const int Algorithm::dy[] = {0, 1, 0, -1};
+const double Algorithm::eps = 0.000001;
 
-WorkingContext::WorkingContext(const cv::Mat &image,
+Algorithm::Algorithm(const cv::Mat &image,
                                const std::set<std::pair<int,int> > &fgSeeds,
                                const std::set<std::pair<int,int> > &bgSeeds,
                                const double &_sigma,
@@ -16,7 +16,7 @@ WorkingContext::WorkingContext(const cv::Mat &image,
         init(image, fgSeeds, bgSeeds);
 }
 
-void WorkingContext::init(const cv::Mat &image, const std::set<std::pair<int,int> > &fgSeeds, const std::set<std::pair<int,int> > &bgSeeds){
+void Algorithm::init(const cv::Mat &image, const std::set<std::pair<int,int> > &fgSeeds, const std::set<std::pair<int,int> > &bgSeeds){
     initialImage = image.clone();
     rows = image.rows;
     cols = image.cols;
@@ -25,8 +25,8 @@ void WorkingContext::init(const cv::Mat &image, const std::set<std::pair<int,int
     initSparse(image);
 }
 
-cv::Mat WorkingContext::getSegmentation(){
-    x = Algorithm::solver(A, b);
+cv::Mat Algorithm::getSegmentation(){
+    x = Utils::solver(A, b);
     qDebug() << "Applying new labels (colors)";
     qDebug() << Xb << Xf << endl;
     for(int i = 0; i < rows; i++)
@@ -39,12 +39,12 @@ cv::Mat WorkingContext::getSegmentation(){
     return initialImage;
 }
 
-WorkingContext::~WorkingContext()
+Algorithm::~Algorithm()
 {
     qDebug() << "working context destroyed.";
 }
 
-void WorkingContext::declareSparse(int N, int M)
+void Algorithm::declareSparse(int N, int M)
 {
     Wij.resize(N*M, N*M);
     D.resize(N*M, N*M);
@@ -58,7 +58,7 @@ void WorkingContext::declareSparse(int N, int M)
     L.reserve(Eigen::VectorXf::Constant(N * M, 5));
 }
 
-void WorkingContext::initSeeds(const std::set<std::pair<int,int> > &fgSeeds, const std::set<std::pair<int,int> > &bgSeeds)
+void Algorithm::initSeeds(const std::set<std::pair<int,int> > &fgSeeds, const std::set<std::pair<int,int> > &bgSeeds)
 {
     for(std::set<std::pair<int,int> > :: iterator it = fgSeeds.begin(); it != fgSeeds.end(); it++)
         fseeds.insert((it->first)*cols+(it->second));
@@ -66,7 +66,7 @@ void WorkingContext::initSeeds(const std::set<std::pair<int,int> > &fgSeeds, con
         bseeds.insert((it->first)*cols+(it->second));
 }
 
-void WorkingContext::initSparse(const cv::Mat &image)
+void Algorithm::initSparse(const cv::Mat &image)
 {
     qDebug() << "initializing sparse...";
     double w, sw;

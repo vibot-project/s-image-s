@@ -1,10 +1,10 @@
-#ifndef WORKINGCONTEXT_H
-#define WORKINGCONTEXT_H
+#ifndef ALGORITHM_H
+#define ALGORITHM_H
 
 #include "init.h"
-#include "algorithm.h"
+#include "utils.h"
 
-class WorkingContext
+class Algorithm
 {
 private:
     static const int dx[];                                  //adjacent pixel indices. horizontal(x)-direction
@@ -41,9 +41,9 @@ private:
     void initSeeds(const std::set<std::pair<int,int> > &fgSeeds, const std::set<std::pair<int,int> > &bgSeeds);
     void initSparse(const cv::Mat &image);
 public:
-    WorkingContext();
-    WorkingContext(const WorkingContext& context);
-    WorkingContext(const cv::Mat &image,
+    Algorithm();
+    Algorithm(const Algorithm& context);
+    Algorithm(const cv::Mat &image,
                    const std::set<std::pair<int,int> > &fgSeeds,
                    const std::set<std::pair<int,int> > &bgSeeds,
                    const double &sigma=0.1,
@@ -53,7 +53,7 @@ public:
     int getRows();
     int getCols();
     cv::Mat getSegmentation();
-    ~WorkingContext();
+    ~Algorithm();
 };
 
-#endif // WORKINGCONTEXT_H
+#endif // Algorithm_H

@@ -1,13 +1,13 @@
-#ifndef ALGORITHM_H
-#define ALGORITHM_H
+#ifndef UTILS_H
+#define UTILS_H
 
 #include "init.h"
 
-class Algorithm
+class Utils
 {
 public:
-    Algorithm();
+    Utils();
     static Eigen::VectorXd solver(const Eigen::SparseMatrix <double> &A, const Eigen::VectorXd &b);
 };
 
-#endif // ALGORITHM_H
+#endif // UTILS_H

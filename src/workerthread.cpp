@@ -15,7 +15,7 @@ void WorkerThread::process()
 {
     beginTime = clock();
     updateProgress(10);
-    context = new WorkingContext(image, fgSeeds, bgSeeds, sigma, beta, Xb, Xf);
+    context = new Algorithm(image, fgSeeds, bgSeeds, sigma, beta, Xb, Xf);
     updateProgress(20);
     resultImage = context->getSegmentation();
     updateProgress(90);
