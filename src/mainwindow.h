@@ -7,9 +7,9 @@
 #include <QLabel>
 #include <QScrollBar>
 #include "init.h"
-#include "workingcontext.h"
-#include "workerthread.h"
 #include "algorithm.h"
+#include "workerthread.h"
+#include "utils.h"
 #include "labeldraw.h"
 #include "help.h"
 

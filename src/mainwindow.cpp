@@ -399,6 +399,7 @@ void MainWindow::progressUpdate(int value, QString text)
         ui->horizontalSlider->setEnabled(true);
         ui->Button_open->setEnabled(true);
         ui->actionOpen->setEnabled(true);
+        paint = false;
     }
 }
 
