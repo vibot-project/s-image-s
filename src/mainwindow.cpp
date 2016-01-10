@@ -328,11 +328,18 @@ void MainWindow::on_algstart_clicked()
     // Reference:
     // How to use qthreads in a proper way
     // https://mayaposch.wordpress.com/2011/11/01/how-to-really-truly-use-qthreads-the-full-explanation/
+
+    // when progressEvent emitted, update progress bar in GUI
     connect(worker, SIGNAL(progressEvent(int,QString)), this, SLOT(progressUpdate(int,QString)));
+    // when thread encountered an error, call errorHandler in mainwindow
     connect(worker, SIGNAL(error(QString)), this, SLOT(errorHandler(QString)));
+    // when thread is started, call process in worker
     connect(thread, SIGNAL(started()), worker, SLOT(process()));
+    // when worker finished, show the result in GUI
     connect(worker, SIGNAL(finished(QImage, QString)), this, SLOT(showImage(QImage, QString)));
+    // when worker finished, quit thread
     connect(worker, SIGNAL(finished(QImage, QString)), thread, SLOT(quit()));
+    // when worker finished, delete the instance of worker
     connect(worker, SIGNAL(finished(QImage, QString)), worker, SLOT(deleteLater()));
     thread->start();
     fseeds.clear();
@@ -340,7 +347,7 @@ void MainWindow::on_algstart_clicked()
     }
 }
 
-// Saving the label image to the directary.
+//Saving the label image to the directary.
 //Reference: http://creative-punch.net/2014/02/opening-displaying-saving-images-qt
 void MainWindow::on_saveButton_clicked()
 {
