@@ -48,7 +48,6 @@ SOURCES += src/main.cpp\
         src/mainwindow.cpp \
     src/workerthread.cpp \
     src/labeldraw.cpp \
-    src/help.cpp \
     src/utils.cpp \
     src/algorithm.cpp
 
@@ -56,9 +55,7 @@ HEADERS  += src/mainwindow.h \
     src/workerthread.h \
     src/init.h \
     src/labeldraw.h \
-    src/help.h \
     src/utils.h \
     src/algorithm.h
 
-FORMS    += src/mainwindow.ui \
-    src/help.ui
+FORMS    += src/mainwindow.ui

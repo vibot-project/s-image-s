@@ -264,26 +264,6 @@ void MainWindow::mouseMoved()
                 paintpen.setColor(Qt::green);
                 paintpen.setWidth(4);
             }
-            else if(select == 2)
-            {
-                paintpen.setColor(Qt::yellow);
-                paintpen.setWidth(4);
-            }
-            else if(select == 3)
-            {
-                paintpen.setColor(Qt::blue);
-                paintpen.setWidth(4);
-            }
-            else if(select == 4)
-            {
-                paintpen.setColor(Qt::black);
-                paintpen.setWidth(4);
-            }
-            else if(select == 5)
-            {
-                paintpen.setColor(Qt::white);
-                paintpen.setWidth(4);
-            }
             // Reading the point from the mouse and label the point color on the displayed image.
             painter.setPen(paintpen);
             painter.drawLine(xpointStart, ypointStart, xpointEnd, ypointEnd);
@@ -295,15 +275,6 @@ void MainWindow::mouseMoved()
                 bseeds.insert(std::make_pair(ypointEnd, xpointEnd));
             else if(select == 1)
                 fseeds.insert(std::make_pair(ypointEnd, xpointEnd));
-//            else if(select == 2)
-//                bseeds.insert(std::make_pair(ypointEnd, xpointEnd));
-//            else if(select == 3)
-//                bseeds.insert(std::make_pair(ypointEnd, xpointEnd));
-//            else if(select == 4)
-//                bseeds.insert(std::make_pair(ypointEnd, xpointEnd));
-//            else if(select == 5)
-//                bseeds.insert(std::make_pair(ypointEnd, xpointEnd));
-
         }
 }
 
@@ -311,25 +282,34 @@ void MainWindow::mouseMoved()
 void MainWindow::on_ground_currentIndexChanged(int index)
 {
     select = index;
-    qDebug() << "selected index:" << select;
 }
 
-// creating the select layer for the ground layer.
-void MainWindow::on_uiFgrNum_currentIndexChanged(int index)
-{
-    ui->ground->clear();
-    ui->ground->addItem(QString("Background"));
-    ui->ground->addItem(QString("Foreground"));
-    for(int i = 0; i < index; i++)
-    {
-        ui->ground->addItem(QString("Foreground-%1").arg(i+2));
-    }
-}
 
 //%%%%%%%%%%%%%% PROCESS SECTION %%%%%%%%%%%%%%%%%%%%
+// Check for the valid entry in the beta text editor
+void MainWindow::on_uiBetaValue_editingFinished()
+{
+    QString betavalue = ui->uiBetaValue->text();
+    bool check;
+    betavalue.toDouble(&check);
+    if(!check)
+    {
+        QMessageBox::information(this, "Error message","Enter Valid Integer");
+    }
+}
 // Starting the algorithm process
 void MainWindow::on_algstart_clicked()
 {
+    QString betavalue = ui->uiBetaValue->text();
+    bool check;
+    betavalue.toDouble(&check);
+    if(!check)
+    {
+        QMessageBox::information(this, "Error message","Enter Valid Integer");
+    }
+    else
+    {
+        double beta = betavalue.toDouble();
     if(bseeds.empty()){
         QMessageBox::warning(this, "Seeds not selected!", "Please select background seeds.");
         return;
@@ -343,7 +323,7 @@ void MainWindow::on_algstart_clicked()
     ui->process->setEnabled(false);
     ui->saveButton->setEnabled(false);
     // Creating the worker thread for process.
-    worker = new WorkerThread(cvimage, fseeds, bseeds, 0.1, 0.0001, 3.0, 1.0);
+    worker = new WorkerThread(cvimage, fseeds, bseeds, 0.1, beta, 3.0, 1.0); //sigma,beta,foreground,background
     worker->moveToThread(thread);
     // Reference:
     // How to use qthreads in a proper way
@@ -357,6 +337,7 @@ void MainWindow::on_algstart_clicked()
     thread->start();
     fseeds.clear();
     bseeds.clear();
+    }
 }
 
 // Saving the label image to the directary.
@@ -418,5 +399,7 @@ void MainWindow::on_actionAbout_triggered()
 // Displaying the help about the software setting
 void MainWindow::on_actionHelp_triggered()
 {
-    ui_help.show();
+    QMessageBox::information(this, "Help", "For more details please visit <a href='https://github.com/vibot-project/s-image-s'>https://github.com/vibot-project/s-image-s</a>.");
 }
+
+
