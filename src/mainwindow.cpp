@@ -345,7 +345,9 @@ void MainWindow::on_algstart_clicked()
     // Creating the worker thread for process.
     worker = new WorkerThread(cvimage, fseeds, bseeds, 0.1, 0.0001, 3.0, 1.0);
     worker->moveToThread(thread);
-    // connecting the signal with the process thread.
+    // Reference:
+    // How to use qthreads in a proper way
+    // https://mayaposch.wordpress.com/2011/11/01/how-to-really-truly-use-qthreads-the-full-explanation/
     connect(worker, SIGNAL(progressEvent(int,QString)), this, SLOT(progressUpdate(int,QString)));
     connect(worker, SIGNAL(error(QString)), this, SLOT(errorHandler(QString)));
     connect(thread, SIGNAL(started()), worker, SLOT(process()));
@@ -357,10 +359,8 @@ void MainWindow::on_algstart_clicked()
     bseeds.clear();
 }
 
-//@brief MainWindow::on_saveButton_clicked
-//@cite: http://creative-punch.net/2014/02/opening-displaying-saving-images-qt
-
 // Saving the label image to the directary.
+//Reference: http://creative-punch.net/2014/02/opening-displaying-saving-images-qt
 void MainWindow::on_saveButton_clicked()
 {
     QImage image = imageLabel->pixmap()->toImage();
