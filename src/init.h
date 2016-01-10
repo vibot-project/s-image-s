@@ -14,6 +14,7 @@
 #ifndef INIT
 #define INIT
 
+// Initializing the Global include section
 #include <opencv2/opencv.hpp>
 #include <eigen3/Eigen/Sparse>
 

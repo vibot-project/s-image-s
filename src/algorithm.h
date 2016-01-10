@@ -1,12 +1,15 @@
 #ifndef ALGORITHM_H
 #define ALGORITHM_H
 
+// Including the classes
 #include "init.h"
 #include "utils.h"
 
 class Algorithm
 {
 private:
+
+    // Static delcaration
     static const int dx[];                                  //adjacent pixel indices. horizontal(x)-direction
     static const int dy[];                                  //adjacent pixel indices. vertical(y)-direction
     static const double eps;
@@ -14,8 +17,8 @@ private:
     /**
      * Tunining constants.
      */
-    double sigma;// = 0.1;                                     //TODO: add definition here & move initialization to constructor
-    double beta;// = 0.00001;                                  //TODO: add definition here & move initialization to constructor
+    double sigma;// = 0.1;                                     //initialization to constructor
+    double beta;// = 0.00001;                                  //initialization to constructor
     double Xb;// = 3.;                                         //Background label
     double Xf;// = 1.;                                         //Foreground label
 
@@ -36,11 +39,13 @@ private:
 
     cv::Mat initialImage;
 
+    // Functions for the matrix and seed initialization.
     void init(const cv::Mat &image, const std::set<std::pair<int,int> > &fgSeeds, const std::set<std::pair<int,int> > &bgSeeds);
     void declareSparse(int, int);
     void initSeeds(const std::set<std::pair<int,int> > &fgSeeds, const std::set<std::pair<int,int> > &bgSeeds);
     void initSparse(const cv::Mat &image);
 public:
+    // Various constructor for the algorithm
     Algorithm();
     Algorithm(const Algorithm& context);
     Algorithm(const cv::Mat &image,
